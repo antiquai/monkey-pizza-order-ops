@@ -1,0 +1,141 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: restaurant_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - pizza_network
+
+  db:
+    image: postgres:15-alpine
+    container_name: restaurant_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pizza_network
+
+  gateway:
+    build: ./gateway
+    container_name: restaurant_gateway
+    volumes:
+      - ./gateway:/app
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db
+    networks:
+      - pizza_network
+
+  waiter:
+    build: ./frontend-kasse
+    container_name: restaurant_waiter
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://192.168.178.54:8000
+    networks:
+      - pizza_network
+
+  kitchen:
+    build: ./frontend-kitchen
+    container_name: restaurant_kitchen
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://192.168.178.54:8000
+    networks:
+      - pizza_network
+
+  packstation:
+    build: ./frontend-packstation
+    container_name: restaurant_pack
+    ports:
+      - "3002:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://192.168.178.54:8000
+    networks:
+      - pizza_network
+
+  worker-db:
+    build: ./worker_db
+    volumes:
+      - ./worker_db:/app
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REDIS_HOST=redis
+      - DB_HOST=db
+    depends_on:
+      - redis
+      - db
+    networks:
+      - pizza_network
+    deploy:
+      replicas: 1
+
+  worker-printer:
+    build: ./worker_printer
+    volumes:
+      - ./worker_printer:/app
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REDIS_HOST=redis
+      - DB_HOST=db
+    depends_on:
+      - redis
+      - db
+    networks:
+      - pizza_network
+    deploy:
+      replicas: 1
+
+  worker-updater:
+    build: ./worker_updater
+    volumes:
+      - ./worker_updater:/app
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REDIS_HOST=redis
+      - DB_HOST=db
+    depends_on:
+      - redis
+      - db
+    networks:
+      - pizza_network
+    deploy:
+      replicas: 1
+
+  catalog_init:
+    build: ./catalog_init
+    container_name: restaurant_catalog_init
+    volumes:
+      - ./catalog_init:/app
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DB_HOST=db
+    depends_on:
+      - db
+    networks:
+      - pizza_network
+    deploy:
+      replicas: 1
+
+volumes:
+  postgres_data:
+
+networks:
+  pizza_network:
+    driver: bridge

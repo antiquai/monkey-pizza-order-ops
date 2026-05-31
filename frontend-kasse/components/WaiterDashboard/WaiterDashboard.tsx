@@ -1,0 +1,167 @@
+'use client'
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useState } from "react";
+
+import ReceiptComponent from './ReciepComponent';
+import ReceiptComponentCancelFunction from "./ReciepComponentCancelFunction";
+import { AlertComponent } from "../BricksComponent/AlertComponents/AlertComponent";
+
+import { toast } from "sonner";
+
+export interface OrderModifier {
+  name: string;
+  price: number;
+  category: 'topping' | 'dip' | 'drink';
+  count? : number | null;
+}
+
+export interface OrderItem {
+    name: string;
+    q: number;
+    base_price: number;
+    modifiers?: OrderModifier[];
+}
+
+export interface Order {
+    order_id : number;
+    customer: string;
+    address: string;
+    type_of_delivery: string;
+    items: OrderItem[];
+    total_price: number;
+    status?: string;
+}
+
+const API_URL = "http://192.168.2.35:8000";
+
+export default function WaiterDashboard() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const handleCancel = async (orderId: number) => {
+    const sendData = {
+        order_id: orderId,
+        statusbar: "cancelled"
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/cancel_order`, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify(sendData)
+      });
+
+      if (response.ok) {
+          toast.custom((t) => (
+              <div className="w-full flex justify-center">
+                <AlertComponent />
+              </div>
+          ))
+      }
+    } catch (error) {
+      console.error("Error canceling order:", error);
+    }
+  }
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${API_URL}/get_orders`)
+      .then(r => r.json())
+      .then((data) => {
+        console.log("API response:", data); // ← check what shape it actually is
+        setOrders(Array.isArray(data) ? data : data.orders ?? []);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const activeOrders    = orders.filter(o => o.status === "pending" );
+  const deliveryOrders  = orders.filter(o => o.status === "in delivery");
+  const archivedOrders  = orders.filter(o => o.status === "done");
+  const cancelledOrders = orders.filter(o => o.status === "cancelled");
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+            Loading orders...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative h-[97vh] flex rounded-2xl m-3 bg-white backdrop-blur-xl font-sans overflow-hidden">
+      <div className="p-8 w-full max-w-6xl mx-auto overflow-y-auto">
+        <h1 className="text-3xl font-black uppercase mb-8 tracking-tighter">Terminal Monitor</h1>
+
+        <Tabs defaultValue="active" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-8 bg-zinc-100 p-1">
+            <TabsTrigger value="active" className="font-bold uppercase text-xs">
+              In Progress ({activeOrders.length})
+            </TabsTrigger>
+            <TabsTrigger value="archived" className="font-bold uppercase text-xs">
+              History ({archivedOrders.length})
+            </TabsTrigger>
+            <TabsTrigger value="in_delivery" className="font-bold uppercase text-xs">
+              In Delivery ({deliveryOrders.length})
+            </TabsTrigger>
+            <TabsTrigger value="cancelled" className="font-bold uppercase text-xs">
+              Canceled ({cancelledOrders.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="active">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {activeOrders.sort((a, b) => a.order_id - b.order_id).map(order => (
+                <ReceiptComponentCancelFunction key={order.order_id} order={order} onDone={() => handleCancel(order.order_id)} />
+              ))}
+            </div>
+            {activeOrders.length === 0 && (
+              <div className="text-center py-20 text-zinc-300 font-mono">No active orders.</div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="archived">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {archivedOrders.sort((a, b) => b.order_id - a.order_id).map(order => (
+                <ReceiptComponent key={order.order_id} order={order} />
+              ))}
+            </div>
+            {archivedOrders.length === 0 && (
+              <div className="text-center py-20 text-zinc-300 font-mono">No archived orders.</div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="in_delivery">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {deliveryOrders.sort((a, b) => b.order_id - a.order_id).map(order => (
+                <ReceiptComponent key={order.order_id} order={order} />
+              ))}
+            </div>
+            {deliveryOrders.length === 0 && (
+              <div className="text-center py-20 text-zinc-300 font-mono">No orders in delivery.</div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="cancelled">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {cancelledOrders.sort((a, b) => b.order_id - a.order_id).map(order => (
+                <ReceiptComponent key={order.order_id} order={order} />
+              ))}
+            </div>
+            {cancelledOrders.length === 0 && (
+              <div className="text-center py-20 text-zinc-300 font-mono">No cancelled orders.</div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
