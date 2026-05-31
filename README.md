@@ -16,7 +16,11 @@
 ![Stripe](https://img.shields.io/badge/Stripe-5851DD?logo=stripe&logoColor=fff)
 
 
-https://github.com/user-attachments/assets/473b9432-11fa-4569-81b7-b9f4007226a2
+
+
+https://github.com/user-attachments/assets/2c599325-7d03-464d-ab0e-382ee16bc52c
+
+
 
 
 ## SMB Solutions: An all-in-one app replacing waiters, accountants, and managers.
