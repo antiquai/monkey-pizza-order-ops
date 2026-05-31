@@ -2,3 +2,4 @@
 .env
 .idea
 postgres_data
+backups
