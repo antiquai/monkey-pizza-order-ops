@@ -21,14 +21,14 @@ export default function ProductCard({ order, onDone }: ReceiptProps) {
         } />
       </div>
 
-      {/* Header of Receip */}
+      {/* Header of Receipt */}
       <div className="text-center border-b border-dashed border-zinc-300 pb-4 mb-4">
         <Image src="/logo_m.png" alt="Logo" width={40} height={40} className="mx-auto mb-2" />
         <h2 className="text-md text-blue-950 font-black uppercase">Order #{order.order_id}</h2>
         <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Kitchen Receipt</p>
         <p className="font-black text-[20px] uppercase">{order.type_of_delivery}</p>
       </div>
-      {/* Cleint info */}
+      {/* Client info */}
       {order.type_of_delivery === 'Lieferservice' && (
         <div className="space-y-1 mb-4 text-xs uppercase">
           <p><span className="font-bold">Customer:</span> {order.customer}</p>
@@ -60,7 +60,6 @@ export default function ProductCard({ order, onDone }: ReceiptProps) {
             </div>
         ))}
       </div>
-      {/* <h2 className={`text-[15px] justify-center items-center ${order.status ? 'text-green-500' : 'text-red-500'}`}>{order.status || 'Pending'}</h2> */}
       {/* Total */}
       <div className="flex justify-between font-black text-lg uppercase">
         <span>Total</span>

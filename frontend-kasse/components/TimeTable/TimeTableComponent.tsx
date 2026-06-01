@@ -162,11 +162,11 @@ export default function TimeTableComponent() {
       <div className="flex-1 overflow-y-auto p-8">
         <h1 className="text-3xl font-black uppercase mb-8 tracking-tighter">Timetable</h1>
 
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div className="flex flex-col gap-2">
 
-            {/* Week selector badge / dropdown */}
+            {/* Week selector */}
             {weeks.length > 0 && (
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -207,9 +207,9 @@ export default function TimeTableComponent() {
             )}
           </div>
 
-          {/* Right side controls */}
+          {/* Controls */}
           <div className="flex items-center gap-2">
-            {/* Edit / View toggle — only for selected week */}
+            {/* Edit */}
             {selectedWeek && (
               <button
                 onClick={() => setMode(m => m === "view" ? "edit" : "view")}
@@ -233,7 +233,7 @@ export default function TimeTableComponent() {
           </div>
         </div>
 
-        {/* ── Create form ── */}
+        {/* Create form */}
         <AnimatePresence>
           {showCreateForm && (
             <motion.div
@@ -279,7 +279,7 @@ export default function TimeTableComponent() {
           )}
         </AnimatePresence>
 
-        {/* ── Table ── */}
+        {/* Table */}
         <AnimatePresence mode="wait">
           {selectedWeek && (
             <motion.div
@@ -304,7 +304,7 @@ export default function TimeTableComponent() {
           )}
         </AnimatePresence>
 
-        {/* ── Staff badges (only in edit mode) ── */}
+        {/* Staff badges (only in edit mode) */}
         <AnimatePresence>
           {selectedWeek && mode === "edit" && (
             <motion.div

@@ -71,7 +71,7 @@ export default function WaiterDashboard() {
     fetch(`${API_URL}/get_orders`)
       .then(r => r.json())
       .then((data) => {
-        console.log("API response:", data); // ← check what shape it actually is
+        console.log("API response:", data); 
         setOrders(Array.isArray(data) ? data : data.orders ?? []);
       })
       .catch(console.error)

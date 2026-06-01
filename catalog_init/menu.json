@@ -1,0 +1,247 @@
+{
+  "ingredients": [
+    {"code":"dough_ball","name":"Dough ball","unit":"pcs"},
+    {"code":"tomato_sauce","name":"Tomato sauce","unit":"ml"},
+    {"code":"holland_sauce","name":"Holland sauce","unit":"ml"},
+    {"code":"cheese","name":"Cheese","unit":"g"},
+    {"code":"tuna","name":"Tuna","unit":"g"},
+    {"code":"onion","name":"Onion","unit":"g"},
+    {"code":"salami","name":"Salami","unit":"pcs"},
+    {"code":"ham","name":"Ham","unit":"pcs"},
+    {"code":"broccoli","name":"Broccoli","unit":"g"},
+    {"code":"sucuk","name":"Sucuk","unit":"g"},
+    {"code":"cola_03","name":"Cola 0.3","unit":"bottle"},
+    {"code":"monster_05","name":"Monster 0.5","unit":"can"},
+    {"code":"aioli_dip","name":"Aioli Dip","unit":"pcs"},
+    {"code":"ketchup_dip","name":"Ketchup Dip","unit":"pcs"}
+  ],
+    "packs": {
+        "pizza_base_26": [
+            {"ingredient":"dough_ball","qty":1,"unit":"pcs"},
+            {"ingredient":"cheese","qty":100,"unit":"g"}
+        ],
+        "pizza_base_30": [
+            {"ingredient":"dough_ball","qty":1,"unit":"pcs"},
+            {"ingredient":"cheese","qty":100,"unit":"g"}
+        ],
+        "pizza_base_34": [
+            {"ingredient":"dough_ball","qty":2,"unit":"pcs"},
+            {"ingredient":"cheese","qty":200,"unit":"g"}
+        ]
+  },
+    "items": [
+        {
+          "name":"Pizza Margherita",
+          "category":"Pizza",
+          "sizes": {
+            "26cm": {
+              "packs":["pizza_base_26"],
+              "ingredients":[
+                {"ingredient":"tomato_sauce","qty":50,"unit":"ml"}
+              ],
+              "price": 10.00
+            },
+            "30cm": {
+              "packs":["pizza_base_30"],
+              "ingredients":[
+                {"ingredient":"tomato_sauce","qty":65,"unit":"ml"}
+              ],
+              "price": 12.00
+            },
+            "34cm": {
+              "packs":["pizza_base_34"],
+              "ingredients":[
+                {"ingredient":"tomato_sauce","qty":100,"unit":"ml"}
+              ],
+              "price": 15.00
+            }
+          }
+        },
+        {
+          "name":"Pizza Tonno",
+          "category":"Pizza",
+          "sizes": {
+            "26cm": {
+              "packs":["pizza_base_26"],
+              "ingredients":[
+                {"ingredient":"tomato_sauce","qty":50,"unit":"ml"},
+                {"ingredient":"tuna","qty":50,"unit":"g"},
+                {"ingredient":"onion","qty":60,"unit":"g"}
+              ],
+                "price": 13.00
+            },
+            "30cm": {
+              "packs":["pizza_base_30"],
+              "ingredients":[
+                {"ingredient":"tomato_sauce","qty":65,"unit":"ml"},
+                {"ingredient":"tuna","qty":50,"unit":"g"},
+                {"ingredient":"onion","qty":60,"unit":"g"}
+              ],
+                "price": 15.00
+            },
+            "34cm": {
+              "packs":["pizza_base_34"],
+              "ingredients":[
+                {"ingredient":"tomato_sauce","qty":100,"unit":"ml"},
+                {"ingredient":"tuna","qty":100,"unit":"g"},
+                {"ingredient":"onion","qty":120,"unit":"g"}
+              ],
+                "price": 18.00
+            }
+          }
+        },
+        {
+          "name":"Pizza Boston",
+          "category":"Pizza",
+          "sizes": {
+            "26cm": {
+              "packs":["pizza_base_26"],
+              "ingredients":[
+                {"ingredient":"holland_sauce","qty":50,"unit":"ml"},
+                {"ingredient":"ham","qty":8,"unit":"pcs"},
+                {"ingredient":"broccoli","qty":70,"unit":"g"}
+              ],
+              "price": 12.00
+            },
+            "30cm": {
+              "packs":["pizza_base_30"],
+              "ingredients":[
+                {"ingredient":"holland_sauce","qty":65,"unit":"ml"},
+                {"ingredient":"ham","qty":9,"unit":"pcs"},
+                {"ingredient":"broccoli","qty":70,"unit":"g"}
+              ],
+              "price": 14.00
+            },
+            "34cm": {
+              "packs":["pizza_base_34"],
+              "ingredients":[
+                {"ingredient":"holland_sauce","qty":100,"unit":"ml"},
+                {"ingredient":"ham","qty":15,"unit":"pcs"},
+                {"ingredient":"broccoli","qty":140,"unit":"g"}
+              ],
+              "price": 16.00
+            }
+          }
+        },
+        {
+          "name":"Pizza Salami",
+          "category":"Pizza",
+          "sizes": {
+            "26cm": {
+              "packs":["pizza_base_26"],
+              "ingredients":[
+                {"ingredient":"tomato_sauce","qty":50,"unit":"ml"},
+                {"ingredient":"salami","qty":8,"unit":"pcs"}
+              ],
+              "price": 12.00
+            },
+            "30cm": {
+              "packs":["pizza_base_30"],
+              "ingredients":[
+                {"ingredient":"tomato_sauce","qty":65,"unit":"ml"},
+                {"ingredient":"salami","qty":9,"unit":"pcs"}
+              ],
+              "price": 14.00
+            },
+            "34cm": {
+              "packs":["pizza_base_34"],
+              "ingredients":[
+                {"ingredient":"tomato_sauce","qty":100,"unit":"ml"},
+                {"ingredient":"salami","qty":15,"unit":"pcs"}
+              ],
+              "price": 16.00
+            }
+          }
+        },
+
+        {
+          "name":"Pizzabrötchen mit Käse",
+          "category":"Pizzabrötchen",
+          "ingredients":[
+            {"ingredient":"dough_ball","qty":1,"unit":"pcs"},
+            {"ingredient":"cheese","qty":50,"unit":"g"}
+          ],
+          "price": 6.00
+        },
+        {
+          "name":"Pizzabrötchen mit Thunfisch",
+          "category":"Pizzabrötchen",
+          "ingredients":[
+            {"ingredient":"dough_ball","qty":1,"unit":"pcs"},
+            {"ingredient":"tuna","qty":30,"unit":"g"},
+            {"ingredient":"cheese","qty":50,"unit":"g"}
+          ],
+            "price": 6.00
+        },
+        {
+          "name":"Pizzabrötchen mit Sucuk",
+          "category":"Pizzabrötchen",
+          "ingredients":[
+            {"ingredient":"dough_ball","qty":1,"unit":"pcs"},
+            {"ingredient":"sucuk","qty":30,"unit":"g"},
+            {"ingredient":"cheese","qty":50,"unit":"g"}
+          ],
+          "price": 6.00
+        },
+
+        {
+          "name":"Cola 0.3",
+          "category":"Drink",
+          "ingredients":[
+            {"ingredient":"cola_03","qty":1,"unit":"bottle"}
+          ],
+          "price": 2.00
+        },
+        {
+          "name":"Monster 0.5",
+          "category":"Drink",
+          "ingredients":[
+            {"ingredient":"monster_05","qty":1,"unit":"can"}
+          ],
+          "price": 3.00
+        },
+
+        {
+          "name":"Aioli Dip",
+          "category":"Dip",
+          "ingredients":[
+            {"ingredient":"aioli_dip","qty":1,"unit":"pcs"}
+          ],
+          "price": 1.00
+        },
+        {
+          "name":"Ketchup Dip",
+          "category":"Dip",
+          "ingredients":[
+            {"ingredient":"ketchup_dip","qty":1,"unit":"pcs"}
+          ],
+          "price": 1.00
+        }
+    ],
+    
+    "modifiers": {
+      "extra_tuna": [
+        {
+          "ingredient":"tuna",
+          "qty":30,
+          "unit":"g"
+        }
+      ],
+
+      "extra_cheese": [
+        {
+          "ingredient":"cheese",
+          "qty":50,
+          "unit":"g"
+        }
+      ],
+
+      "extra_onion": [
+        {
+          "ingredient":"onion",
+          "qty":50,
+          "unit":"g"
+        }
+      ]
+    }
+}

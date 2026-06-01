@@ -83,8 +83,8 @@ class StaffMember(BaseModel):
 class Modifier(BaseModel):
     name: str
     price: float
-    category: str # e.g. "drink", "side", "extra" etc.
-    count: int = 0 # Quantity of this modifier, e.g. 2 extra cheese
+    category: str 
+    count: int = 0 
     
 class Items(BaseModel):
     product_id: Optional[int] = None
@@ -92,7 +92,7 @@ class Items(BaseModel):
     size: Optional[str] = None
     q: int
     base_price: float
-    modifiers: Optional[List[Modifier]] = [] # List of modifiers for the item, e.g. extra cheese, no onions etc.
+    modifiers: Optional[List[Modifier]] = [] 
     
     @property
     def total_item_price(self) -> float:
@@ -229,14 +229,14 @@ async def get_orders():
     orders = []
     if rows != None:
         for row in rows:
-            kitchen_id = row[0]  # e.g. "order_42"
+            kitchen_id = row[0]  
             order_id = int(kitchen_id.replace("order_", "")) if kitchen_id else 0
             orders.append({
                 "order_id": order_id,
                 "customer": row[1],
                 "address": row[2],
                 "type_of_delivery": row[3],
-                "items": row[4],       # already JSONB → dict
+                "items": row[4],       
                 "total_price": row[5],
                 "status": row[6],
             })
@@ -298,11 +298,12 @@ def get_admin_dashboard_analytics():
         cur.close()
         conn.close()
         
+        # MOCK UP DATA FOR ANALYTICS
         stats = [
             {
                 "label": "Total Revenue (Today)",
                 "value": f"${today_revenue:,.2f}",
-                "change": "+12.5%", # Hardcoded placeholder as requested or omit comparison logic
+                "change": "+12.5%", 
                 "trend": "up",
                 "sub": "Live revenue stream",
                 "hint": "Refreshed instantly from completed checkouts",
@@ -391,7 +392,7 @@ def get_personal():
     cur.close(); conn.close()
     return [{"id": r[0], "name": r[1], "color": r[2]} for r in rows]
 
-# GIVE all stuff
+# POST all stuff
 @app.post("/personal")
 def add_personal(data: StaffMember):
     conn = db_connect()
@@ -458,6 +459,7 @@ def delete_entry(entry_id: int):
     conn.commit(); cur.close(); conn.close()
     return {"status": "deleted"}
 
+# GET all weeks for timetable
 @app.get("/timetable/weeks")
 def get_timetable_weeks():
     conn = db_connect()

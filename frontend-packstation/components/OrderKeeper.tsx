@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { AlertComponent } from "./BricksComponent/AlertComponents/AlertComponent";
 import { DectructiveAlertComponent } from "./BricksComponent/AlertComponents/DesctructiveAlertComponent";
 
-// Reference for order data structure
 export interface OrderModifier {
   name: string;
   price: number;
@@ -33,12 +32,12 @@ export interface Order {
 }
 
 const SOCKET_URL = "http://192.168.2.35:8000";
+const GATEWAY_URL = "http://192.168.2.35:8000";
 let socket: Socket;
 
 export default function OrderKeeper() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [isConn, setIsConn] = useState(false);
-    // socket.emit('order_packed', { order_id: orderId, room: "kitchen" });
 
     const handleDone = async (orderId: number, typeOfDelivery: string) => {   
         setOrders((prevOrders) => prevOrders.filter((order) => order.order_id !== orderId));
@@ -49,7 +48,7 @@ export default function OrderKeeper() {
         }
         
         try {
-            const response = await fetch("http://192.168.2.35:8000/order_packed", {
+            const response = await fetch(`${GATEWAY_URL}/order_packed`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

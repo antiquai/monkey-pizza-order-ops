@@ -33,16 +33,17 @@ interface DashboardData {
 
 type Period = "3m" | "30d" | "7d"
 
+const GATEWAY_URL = "http://192.168.2.35:8000";
+
 
 export default function AdminDashboard() {
-  const [activePeriod, setActivePeriod] = useState<Period>("7d") // Adjusted default to 7d based on dynamic table timeframe
+  const [activePeriod, setActivePeriod] = useState<Period>("7d") 
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Adjust endpoint URL if your API gateway runs on a different port or domain
-    fetch("http://localhost:8000/admin_dashboard/analytics")
+    fetch(`${GATEWAY_URL}/admin_dashboard/analytics`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch analytics payload")
         return res.json()

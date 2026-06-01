@@ -41,7 +41,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
     const orderData = {
       customer: user_name || " ",
       address: address || " ",
-      type_of_delivery: deliveryType,        // ← comes from props now
+      type_of_delivery: deliveryType,        
       items: items.map(item => ({
         product_id: item.id,   
         name: item.name,
@@ -63,7 +63,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
         toast.custom(() => <div className="w-full flex justify-center"><AlertComponent /></div>);
         setAddress("");
         setUserName("");
-        onOrderComplete();                    // ← resets back to delivery picker
+        onOrderComplete();                    
       }
     } catch (error) {
       toast.custom(() => <div className="w-full flex justify-center"><DectructiveAlertComponent /></div>);

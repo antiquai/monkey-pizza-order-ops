@@ -14,18 +14,18 @@ export interface Modifier {
 }
 
 export interface ProductSize {
-  size: string;
-  price: number;
+  size: string;   
+  price: number;  
 }
 
 export interface Product {
   id: number;
   name: string;
-  categotry: string;
+  category: string;
   base_price: number | null;
   image: string;
   ingredients?: string;
-  sizes?: ProductSize[];
+  sizes?: ProductSize[]; 
 }
 
 export interface CartItem extends Product {
@@ -36,8 +36,16 @@ export interface CartItem extends Product {
 }
 
 const GATEWAY_URL = "http://192.168.2.35:8000";
-
 const DELIVERY_TYPES = ["Lieferservice", "Zum Mitnehmen", "Restaurant"];
+
+function normaliseSizes(raw: Record<string, { price: number }> | null | undefined): ProductSize[] | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const entries = Object.entries(raw).map(([size, data]) => ({
+    size,
+    price: Number(data.price ?? 0),
+  }));
+  return entries.length > 0 ? entries : undefined;
+}
 
 export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -55,58 +63,64 @@ export default function Catalog() {
   useEffect(() => {
     fetch(`${GATEWAY_URL}/load_catalog`)
       .then(res => res.json())
-      .then(data => {
-        setProducts(data.map((p: any) => ({
-          ...p,
-          categotry: p.category,
-        })));
+      .then((data: any[]) => {
+        const mapped: Product[] = data.map(p => ({
+          id:         p.id,
+          name:       p.name,
+          category:   p.category,
+          base_price: p.base_price !== null ? Number(p.base_price) : null,
+          image:      p.image,
+          ingredients: p.ingredients,
+          sizes:      normaliseSizes(p.sizes),
+        }));
+        setProducts(mapped);
       })
       .catch(err => console.error("Failed to load catalog:", err))
       .finally(() => setLoadingProducts(false));
   }, []);
 
-  const categories = ["All", ...Array.from(new Set(products.map(p => p.categotry)))];
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(products.map(p => p.category)))],
+    [products],
+  );
 
-  const filterProducts = useMemo(() => {
+  const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = activeCategory === "All" || p.categotry === activeCategory;
+      const matchesSearch   = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = activeCategory === "All" || p.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchTerm, activeCategory, products]); // ← products added here
+  }, [searchTerm, activeCategory, products]);
 
   const handleAddClick = (product: Product) => {
     setModSelectorState({ isOpen: true, product });
   };
 
-  const handleConfiemAddItem = (selectedModifiers: Modifier[], selectedSize?: ProductSize) => {
+  const handleConfirmAddItem = (selectedModifiers: Modifier[], selectedSize?: ProductSize) => {
     const product = modSelectorState.product;
     if (!product) return;
 
-    const basePrice = selectedSize?.price ?? product.base_price ?? 0;
-    const modsPrice = selectedModifiers.reduce((acc, m) => acc + (m.price * m.count), 0);
+    const basePrice  = selectedSize?.price ?? product.base_price ?? 0;
+    const sizeKey    = selectedSize ? selectedSize.size : "default";
+    const modsHash   = selectedModifiers.map(m => `${m.name}:${m.count}`).sort().join("|");
+    const cartItemId = `${product.id}-${sizeKey}-${modsHash}`;
 
     setCart(prev => {
-      const sizeKey = selectedSize ? selectedSize.size : "default";
-      const modsHash = selectedModifiers.map(m => `${m.name}:${m.count}`).sort().join('|');
-      const cartItemId = `${product.id}-${sizeKey}-${modsHash}`;
-
       const existing = prev.find(item => item.cart_unique_id === cartItemId);
       if (existing) {
         return prev.map(item =>
-          item.cart_unique_id === cartItemId ? { ...item, qty: item.qty + 1 } : item
+          item.cart_unique_id === cartItemId ? { ...item, qty: item.qty + 1 } : item,
         );
       }
-
       return [
         ...prev,
         {
           ...product,
           cart_unique_id: cartItemId,
-          base_price: basePrice,
-          qty: 1,
-          selected_size: selectedSize?.size,
-          modifiers: selectedModifiers,
+          base_price:     basePrice,
+          qty:            1,
+          selected_size:  selectedSize?.size,
+          modifiers:      selectedModifiers,
         },
       ];
     });
@@ -125,7 +139,7 @@ export default function Catalog() {
     setActiveCategory("All");
   };
 
-  // ─── SCREEN 1: Delivery type picker ───────────────────────────────────────
+  // Delivery picker screen
   if (!deliveryType) {
     return (
       <div className="relative h-[97vh] flex flex-col items-center justify-center rounded-2xl m-3 bg-white font-sans gap-6">
@@ -153,11 +167,10 @@ export default function Catalog() {
     );
   }
 
-  // ─── SCREEN 2: Catalog + Cart ──────────────────────────────────────────────
+  // Catalog + cart screen
+
   return (
     <div className="relative h-[97vh] flex rounded-2xl m-3 bg-white backdrop-blur-xl font-sans overflow-hidden">
-
-      {/* Left — product list */}
       <div className="flex-1 overflow-y-auto px-6 md:px-12 py-8">
         <header className="px-10">
           <div className="flex justify-between items-end gap-4">
@@ -194,10 +207,10 @@ export default function Catalog() {
         <main className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12 pl-10 pb-20">
           {loadingProducts ? (
             <div className="col-span-full text-center py-20 text-gray-400">
-              Loading catalog...
+              Loading catalog…
             </div>
-          ) : filterProducts.length > 0 ? (
-            filterProducts.map(p => (
+          ) : filteredProducts.length > 0 ? (
+            filteredProducts.map(p => (
               <ProductCardComponent key={p.id} product={p} onAdd={handleAddClick} />
             ))
           ) : (
@@ -208,7 +221,6 @@ export default function Catalog() {
         </main>
       </div>
 
-      {/* Right — cart */}
       <aside className="w-120 border-l border-gray-100 bg-white">
         <PrimerCart
           items={cart}
@@ -219,13 +231,13 @@ export default function Catalog() {
         />
       </aside>
 
-      {/* Modifier selector modal */}
+      {/* Modifier selector */}
       {modSelectorState.product && (
         <ModifierSelector
           product={modSelectorState.product}
           isOpen={modSelectorState.isOpen}
           onClose={() => setModSelectorState({ isOpen: false, product: null })}
-          onConfirm={handleConfiemAddItem}
+          onConfirm={handleConfirmAddItem}
         />
       )}
     </div>

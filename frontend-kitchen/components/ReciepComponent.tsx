@@ -14,18 +14,18 @@ export default function ProductCard({ order, onDone, onCancel }: ReceiptProps) {
   const [isSent, setIsSent] = useState(order.status === 'SENT TO THE OVEN');
 
   const handleClick = () => {
-    setIsSent(true);   // update UI immediately
-    onDone();          // send API in OrderKeeper
+    setIsSent(true);   
+    onDone();          
   };
 
   const handleCancelClick = () => {
-    onCancel()       // send API in OrderKeeper
+    onCancel()       
   };
 
   return (
     <div className="relative bg-white text-black shadow-md border-t-4 border-black font-mono w-full max-w-sm">
 
-      {/* Тег "IN OVEN" (Shadcn Badge или просто div) */}
+      {/* In oven tag*/}
       {isSent ? (
         <div className="absolute top-2 right-2 z-10">
           <Badge type="sent_to_oven" />
@@ -36,14 +36,14 @@ export default function ProductCard({ order, onDone, onCancel }: ReceiptProps) {
         </div>
       ) : null}
 
-      {/* Header of Receip */}
+      {/* Header of Receipt */}
       <div className="text-center border-b border-dashed border-zinc-300 pb-4 mb-4">
         <Image src="/logo_m.png" alt="Logo" width={40} height={40} className="mx-auto mb-2" />
         <h2 className="text-md text-blue-950 font-black uppercase">Order #{order.order_id}</h2>
         <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Kitchen Receipt</p>
         <p className="font-black text-[20px] uppercase">{order.type_of_delivery}</p>
       </div>
-      {/* Cleint info */}
+      {/* Client info */}
       {order.type_of_delivery === 'Lieferservice' && (
         <div className="space-y-1 mb-4 text-xs uppercase">
           <p><span className="font-bold">Customer:</span> {order.customer}</p>

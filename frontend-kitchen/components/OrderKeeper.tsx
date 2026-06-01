@@ -8,7 +8,6 @@ import { AlertComponent } from "./BricksComponent/AlertComponents/AlertComponent
 import { DectructiveAlertComponent } from "./BricksComponent/AlertComponents/DesctructiveAlertComponent";
 
 
-// Reference for order data structure
 export interface OrderModifier {
   name: string;
   price: number;
@@ -35,6 +34,7 @@ export interface Order {
 }
 
 const SOCKET_URL = "http://192.168.2.35:8000";
+const GATEWAY_URL = "http://192.168.2.35:8000";
 let socket: Socket;
 
 export default function OrderKeeper() {
@@ -49,7 +49,7 @@ export default function OrderKeeper() {
 
         try {
             // Send API response and json of order_id number
-            const response = await fetch("http://192.168.2.35:8000/order_in_oven", {
+            const response = await fetch(`${GATEWAY_URL}/order_in_oven`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -80,27 +80,23 @@ export default function OrderKeeper() {
         setOrders(prev => prev.filter(o => o.order_id !== orderId));
     }
 
-    // SOCKET IO CONNECTION AND GETTING INFO OF ORDERS IN REAL TIME, ALSO CLEANING UP SOCKET CONNECTION WHEN COMPONENT UNMOUNTED
+    // Socket io connecting
     useEffect(() => {
-        // Initialize Socket
         socket = io(SOCKET_URL, {
             transports: ["websocket"],
         })
 
-        // Connect to Socket and join kitchen room
         socket.on('connect', () => {
             setIsConn(true);
             console.log('Connected to Gateway, SID: ', socket.id);
             socket.emit('join_room', { room: "kitchen" });
         })
 
-        // Listening ivents in room
         socket.on('new_order_kitchen', (data: Order) => {
             console.log('New order received in kitchen: ', data);
             setOrders((prevOrders) => [ data, ...prevOrders]);
         })
 
-        // Listening event full_done
         socket.on('order_packed', (data: { order_id: number }) => {
             setOrders(prev => prev.filter(o => o.order_id !== data.order_id));
         });
@@ -115,8 +111,7 @@ export default function OrderKeeper() {
                 )
             )
         })
-
-        // Diconnect Socket
+        
         socket.on('disconnect', () => {
             setIsConn(false);
             console.log('Disconnected from Gateway');

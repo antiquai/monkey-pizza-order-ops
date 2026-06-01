@@ -32,7 +32,7 @@ export default function ProductCard({product, onAdd}: Props) {
       <CardContent className="p-4 pb-2">
         <div className="flex flex-col gap-1">
           <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-            {product.categotry}
+            {product.category}
           </h3>
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold tracking-tight text-black transition-colors ">

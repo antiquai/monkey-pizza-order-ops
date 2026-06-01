@@ -36,7 +36,7 @@ export default function Storage() {
             <div className="flex-1 overflow-y-auto p-8">
                 <h1 className="text-3xl font-black uppercase mb-8 tracking-tighter">Storage</h1>
 
-                {/* HEADER */}
+                {/* Header */}
                 <div className="flex items-end justify-between mb-10">
                     <div>
                         <p className="text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-bold mt-2">
@@ -51,10 +51,9 @@ export default function Storage() {
                     </div>
                 </div>
 
-                {/* TABLE */}
+                {/* Table */}
                 <div className="border border-zinc-200 rounded-3xl overflow-hidden">
 
-                    {/* TABLE HEADER */}
                     <div className="grid grid-cols-4 bg-zinc-50 border-b border-zinc-200 px-6 py-4 text-[11px] uppercase tracking-[0.25em] font-black text-zinc-500">
                         <div>Ingredient</div>
                         <div>Quantity</div>
@@ -62,7 +61,6 @@ export default function Storage() {
                         <div>Status</div>
                     </div>
 
-                    {/* CONTENT */}
                     <div className="divide-y divide-zinc-100">
 
                         {loading ? (
