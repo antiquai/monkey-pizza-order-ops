@@ -7,9 +7,10 @@ import ProductCardComponent from "./BricksComponent/CardComponents/Beta_ProductC
 import PrimerCart from "./Beta_PrimerCartComponent";
 
 export interface Modifier {
+  code: string;
   name: string;
   price: number;
-  category: 'extra' | 'dip' | 'drink';
+  category: string;
   count: number;
 }
 
@@ -79,10 +80,15 @@ export default function Catalog() {
       .finally(() => setLoadingProducts(false));
   }, []);
 
-  const categories = useMemo(
-    () => ["All", ...Array.from(new Set(products.map(p => p.category)))],
-    [products],
-  );
+  const CATALOG_CATEGORY_ORDER = ["Pizza", "Pizzabrötchen", "Dip", "Drink"];
+  const categories = useMemo(() => {
+      const existing = new Set(products.map(p => p.category));
+      return [
+          "All",
+          ...CATALOG_CATEGORY_ORDER.filter(c => existing.has(c)),
+          ...Array.from(existing).filter(c => !CATALOG_CATEGORY_ORDER.includes(c)),
+      ];
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {

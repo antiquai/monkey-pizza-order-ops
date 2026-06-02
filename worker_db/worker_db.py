@@ -118,11 +118,10 @@ def build_required_ingredients(cur, order_items):
             if mod_count <= 0:
                 continue
 
-            mod_key = recipe_key_for_modifier(mod.get("name", ""))
+            mod_key = f"modifier:{mod.get('code', '')}"
             _, mod_recipe_items = load_recipe_items(cur, mod_key)
             if not mod_recipe_items:
-                continue  # harmless if modifier is only price/UI, no inventory effect
-
+                continue  
             for ingredient_code, amount, unit in mod_recipe_items:
                 totals[ingredient_code] = totals.get(ingredient_code, 0) + (amount * qty * mod_count)
 

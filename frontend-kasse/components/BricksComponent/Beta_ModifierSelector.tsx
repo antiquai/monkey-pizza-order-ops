@@ -5,20 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Product, Modifier, ProductSize } from "../Beta_Catalog";
 
-const ALL_MODIFIERS: Modifier[] = [
-    { name: "Extra Cheese", price: 1, category: "extra", count: 0 },
-    { name: "Pepperoni",    price: 1, category: "extra", count: 0 },
-    { name: "Tuna",         price: 1, category: "extra", count: 0 },
-    { name: "BBQ Dip",      price: 0.5, category: "dip", count: 0 },
-    { name: "Aioli",        price: 0.5, category: "dip", count: 0 },
-    { name: "Ranch Dip",    price: 0.5, category: "dip", count: 0 },
-    { name: "Coke",         price: 2, category: "drink", count: 0 },
-    { name: "Sprite",       price: 2, category: "drink", count: 0 },
-    { name: "Monster",      price: 3, category: "drink", count: 0 },
-]
 
 interface Props {
     product: Product;
@@ -27,29 +16,43 @@ interface Props {
     onConfirm: (selectedModifiers: Modifier[], selectedSize?: ProductSize) => void;
 }
 
+const GATEWAY_URL = "http://192.168.2.35:8000";
+
 export default function ModifierSelector({ product, isOpen, onClose, onConfirm }: Props) {
+    const [allModifiers, setAllModifiers] = useState<Modifier[]>([]);
     const [selected, setSelected] = useState<Modifier[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedSize, setSelectedSize] = useState<ProductSize | null>(null);
 
     const hasSizes = product.sizes && product.sizes.length > 0;
 
+    useEffect(() => {
+        fetch(`${GATEWAY_URL}/get_modifiers`)
+            .then(res => res.json())
+            .then(data => {
+                console.log("modifiers response:", data); 
+                setAllModifiers(Array.isArray(data) ? data : data.modifiers ?? []);
+            })
+            .catch(err => console.error("Failed to fetch modifiers:", err));
+    }, []);
+
     const filteredGroupedModifiers = useMemo(() => {
-        const filteredList = ALL_MODIFIERS.filter(mod =>
+        const filteredList = allModifiers.filter(mod =>
             mod.name.toLowerCase().includes(searchTerm.toLowerCase())
         );
         return filteredList.reduce((acc, mod) => {
             (acc[mod.category] = acc[mod.category] || []).push(mod);
             return acc;
         }, {} as Record<string, Modifier[]>);
-    }, [searchTerm]);
+    }, [searchTerm, allModifiers]);
 
-    const groupedModifiers = ALL_MODIFIERS.reduce((acc, mod) => {
-        (acc[mod.category] = acc[mod.category] || []).push(mod);
-        return acc;
-    }, {} as Record<string, Modifier[]>);
-
-    const categories = Object.keys(groupedModifiers);
+    const CATEGORY_ORDER = ["Extra", "Dip", "Drink"];
+    const categories = useMemo(
+        () => CATEGORY_ORDER.filter(cat => 
+            allModifiers.some(m => m.category === cat)
+        ),
+        [allModifiers]
+    );
 
     const handleModifierClick = (mod: Omit<Modifier, 'count'>) => {
         setSelected(prev => {
@@ -130,7 +133,7 @@ export default function ModifierSelector({ product, isOpen, onClose, onConfirm }
                     <Tabs defaultValue={categories[0]} className="w-full">
                         <div className="px-6">
                             <TabsList className="grid w-full grid-cols-3 bg-zinc-100 p-1">
-                                {["extra", "dip", "drink"].map(cat => (
+                                {categories.map(cat => (
                                     <TabsTrigger
                                         key={cat}
                                         value={cat}
@@ -143,7 +146,7 @@ export default function ModifierSelector({ product, isOpen, onClose, onConfirm }
                             </TabsList>
                         </div>
 
-                        <div className="py-4 px-6 min-h-87.5">
+                        <div className="py-4 px-6 min-h-87.5 max-h-72 overflow-y-auto">
                             {Object.entries(filteredGroupedModifiers).map(([category, mods]) => (
                                 <TabsContent key={category} value={category} className="mt-0 space-y-2 outline-none">
                                     <p className="text-[10px] text-zinc-400 uppercase font-bold mb-4 tracking-widest text-center">

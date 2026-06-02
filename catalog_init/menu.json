@@ -1,19 +1,19 @@
 {
   "ingredients": [
-    {"code":"dough_ball","name":"Dough ball","unit":"pcs"},
-    {"code":"tomato_sauce","name":"Tomato sauce","unit":"ml"},
-    {"code":"holland_sauce","name":"Holland sauce","unit":"ml"},
-    {"code":"cheese","name":"Cheese","unit":"g"},
-    {"code":"tuna","name":"Tuna","unit":"g"},
-    {"code":"onion","name":"Onion","unit":"g"},
-    {"code":"salami","name":"Salami","unit":"pcs"},
-    {"code":"ham","name":"Ham","unit":"pcs"},
-    {"code":"broccoli","name":"Broccoli","unit":"g"},
-    {"code":"sucuk","name":"Sucuk","unit":"g"},
-    {"code":"cola_03","name":"Cola 0.3","unit":"bottle"},
-    {"code":"monster_05","name":"Monster 0.5","unit":"can"},
-    {"code":"aioli_dip","name":"Aioli Dip","unit":"pcs"},
-    {"code":"ketchup_dip","name":"Ketchup Dip","unit":"pcs"}
+    {"code":"dough_ball","name":"Dough ball","unit":"pcs", "category":"Base", "is_modifier": false, "price_modifier": 0.0},
+    {"code":"tomato_sauce","name":"Tomato sauce","unit":"ml", "category":"Extra", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"holland_sauce","name":"Holland sauce","unit":"ml", "category":"Extra", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"cheese","name":"Cheese","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"tuna","name":"Tuna","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"onion","name":"Onion","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"salami","name":"Salami","unit":"pcs", "category":"Extra", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"ham","name":"Ham","unit":"pcs", "category":"Extra", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"broccoli","name":"Broccoli","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"sucuk","name":"Sucuk","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"cola_03","name":"Cola 0.3","unit":"bottle", "category":"Drink", "is_modifier": true, "price_modifier": 2.0},
+    {"code":"monster_05","name":"Monster 0.5","unit":"can", "category":"Drink", "is_modifier": true, "price_modifier": 3.0},
+    {"code":"aioli_dip","name":"Aioli Dip","unit":"pcs", "category":"Dip", "is_modifier": true, "price_modifier": 1.0},
+    {"code":"ketchup_dip","name":"Ketchup Dip","unit":"pcs", "category":"Dip", "is_modifier": true, "price_modifier": 1.0}
   ],
     "packs": {
         "pizza_base_26": [
@@ -217,31 +217,5 @@
           ],
           "price": 1.00
         }
-    ],
-    
-    "modifiers": {
-      "extra_tuna": [
-        {
-          "ingredient":"tuna",
-          "qty":30,
-          "unit":"g"
-        }
-      ],
-
-      "extra_cheese": [
-        {
-          "ingredient":"cheese",
-          "qty":50,
-          "unit":"g"
-        }
-      ],
-
-      "extra_onion": [
-        {
-          "ingredient":"onion",
-          "qty":50,
-          "unit":"g"
-        }
-      ]
-    }
+    ]
 }

@@ -209,6 +209,33 @@ async def load_catalog():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+@app.get("/get_modifiers")
+async def get_modifiers():
+    try:
+        conn = db_connect()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT code, name, category, price_modifier
+            FROM ingredients
+            WHERE active = TRUE AND is_modifier = TRUE
+            ORDER BY category, name;
+        """)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [
+            {
+                "code": r[0],
+                "name": r[1],
+                "category": r[2],
+                "price": float(r[3]),
+                "count": 0
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Fetch all orders from database
 @app.get("/get_orders")
 async def get_orders():
