@@ -9,6 +9,7 @@ interface StorageItem {
     name: string;
     unit: string;
     quantity: number;
+    reorder_level: number;
     updated_at: string;
 }
 
@@ -27,10 +28,11 @@ export default function Storage() {
             .finally(() => setLoading(false));
     }, []);
 
-    const getStatus = (qty: number) => {
-        if (qty <= 0) return "EMPTY";
-        if (qty < 1000) return "LOW";
-        return "OK";
+    const getStatus = (qty: number, reorder_level: number) => {
+        const status_tresholds = (qty / reorder_level) * 100;
+        if (status_tresholds > 100) return "OK";
+        if (status_tresholds <= 100 && status_tresholds > 20) return "LOW";
+        return "CRITICAL";
     };
 
     if (loading) {
@@ -79,7 +81,7 @@ export default function Storage() {
                                     <div className="divide-y divide-zinc-100">
                                         {colItems.map(item => {
                                             // Add status based on quantity and pack into badge 
-                                            const status = getStatus(item.quantity);
+                                            const status = getStatus(item.quantity, item.reorder_level);
                                             return (
                                                 <div
                                                     key={item.code}

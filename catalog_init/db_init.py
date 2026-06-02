@@ -8,7 +8,7 @@ from typing import Any
 import psycopg2
 from psycopg2.extensions import cursor as Cursor
 
-
+# IMPORTANT TO MANU, REFRACT 
 
 # Database connection
 def _db_connect() -> psycopg2.extensions.connection:
@@ -62,24 +62,6 @@ CREATE TABLE IF NOT EXISTS personal (
     color VARCHAR(20)  DEFAULT '#22c55e'
 );
 
-CREATE TABLE IF NOT EXISTS delivery (
-    id         BIGSERIAL PRIMARY KEY,
-    delivered_at TIMESTAMP  NOT NULL DEFAULT NOW(),
-    supplier    VARCHAR(255),
-    price       NUMERIC(10, 2),
-    note        TEXT,
-    created_by  VARCHAR(100)
-);
-
-CREATE TABLE IF NOT EXISTS delivery_items (
-    id              BIGSERIAL PRIMARY KEY,
-    delivery_id     BIGINT         NOT NULL REFERENCES delivery(id) ON DELETE CASCADE,
-    ingredient_code VARCHAR(100)   NOT NULL REFERENCES ingredients(code),
-    quantity        NUMERIC(12, 3) NOT NULL,
-    unit            VARCHAR(20)    NOT NULL,
-    price_per_unit  NUMERIC(10, 2) NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS timetable (
     id         SERIAL PRIMARY KEY,
     week_start DATE         NOT NULL,
@@ -119,8 +101,8 @@ CREATE TABLE IF NOT EXISTS ingredients (
     name          VARCHAR(255)   NOT NULL,
     unit          VARCHAR(20)    NOT NULL,
     category      VARCHAR(100)   NOT NULL,
-    current_stock NUMERIC(12, 3) NOT NULL DEFAULT 0,
-    reorder_level NUMERIC(12, 3) NOT NULL DEFAULT 0,
+    current_stock NUMERIC(12, 2) NOT NULL DEFAULT 0,
+    reorder_level NUMERIC(12, 2) NOT NULL DEFAULT 0,
     is_modifier   BOOLEAN        NOT NULL DEFAULT FALSE,
     price_modifier NUMERIC(10,2) NOT NULL DEFAULT 0,
     active        BOOLEAN        NOT NULL DEFAULT TRUE,
@@ -181,6 +163,24 @@ CREATE TABLE IF NOT EXISTS recipe_items (
     quantity         NUMERIC(12, 3) NOT NULL,
     unit             VARCHAR(20)    NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS delivery (
+    id         BIGSERIAL PRIMARY KEY,
+    delivered_at TIMESTAMP  NOT NULL DEFAULT NOW(),
+    supplier    VARCHAR(255),
+    price       NUMERIC(10, 2),
+    note        TEXT,
+    created_by  VARCHAR(100)
+);
+
+CREATE TABLE IF NOT EXISTS delivery_items (
+    id              BIGSERIAL PRIMARY KEY,
+    delivery_id     BIGINT         NOT NULL REFERENCES delivery(id) ON DELETE CASCADE,
+    ingredient_code VARCHAR(100)   NOT NULL REFERENCES ingredients(code),
+    quantity        NUMERIC(12, 3) NOT NULL,
+    unit            VARCHAR(20)    NOT NULL,
+    price_per_unit  NUMERIC(10, 2) NOT NULL
+);
 """
 
 
@@ -191,19 +191,20 @@ def _apply_ddl(cur: Cursor) -> None:
 
 # Inventory helpers
 
-def _upsert_ingredient(cur: Cursor, code: str, name: str, unit: str, category: str , is_modifier: bool | None = None, price_modifier: float | None = None) -> None:
+def _upsert_ingredient(cur: Cursor, code: str, name: str, unit: str, category: str , is_modifier: bool | None = None, price_modifier: float | None = None, reorder_level=0.0) -> None:
     cur.execute(
         """
-        INSERT INTO ingredients (code, name, unit, category, is_modifier, price_modifier)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO ingredients (code, name, unit, category, is_modifier, price_modifier, reorder_level)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (code) DO UPDATE SET
             name = EXCLUDED.name,
             unit = EXCLUDED.unit,
             category = EXCLUDED.category,
             is_modifier = EXCLUDED.is_modifier,
-            price_modifier = EXCLUDED.price_modifier
+            price_modifier = EXCLUDED.price_modifier,
+            reorder_level  = EXCLUDED.reorder_level
         """,
-        (code, name, unit, category, is_modifier, price_modifier),
+        (code, name, unit, category, is_modifier, price_modifier, reorder_level),
     )
 
 
@@ -326,7 +327,7 @@ def _seed_ingredients(cur: Cursor, ingredients: list[dict]) -> None:
         return
 
     for ing in ingredients:
-        _upsert_ingredient(cur, ing["code"], ing["name"], ing["unit"], ing.get("category"), ing.get("is_modifier", False), ing.get("price_modifier", 1.0))
+        _upsert_ingredient(cur, ing["code"], ing["name"], ing["unit"], ing.get("category"), ing.get("is_modifier", False), ing.get("price_modifier", 1.0), ing.get("reorder_level", 0.0))
     print(f"ingredients: {len(ingredients)} rows inserted.", flush=True)
 
 

@@ -6,6 +6,7 @@ import psycopg2
 from redis import Redis
 from psycopg2.extras import Json
 
+# FIZ: STILL DONT SUMM MODIFIERS UP PROPERLY, NEED TO CHECK THE RECIPE LOADING AND KEYING LOGIC, ALSO CHECK THE TEST DATA FOR MODIFIERS TO HAVE COUNT/QUANTITY
 
 # DB connection
 def db_connect():
