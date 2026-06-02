@@ -1,9 +1,11 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface StorageItem {
     id: number;
+    code: string;
     name: string;
     unit: string;
     quantity: number;
@@ -31,6 +33,17 @@ export default function Storage() {
         return "OK";
     };
 
+    if (loading) {
+        return(
+            <div className="h-[97vh] flex items-center justify-center bg-white m-3 rounded-2xl">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="w-8 h-8 animate-spin text-zinc-500" />
+                <p className="text-sm font-medium text-zinc-500">Loading live business metrics...</p>
+              </div>
+            </div>
+        )
+    }
+
     return (
         <div className="relative min-h-[97vh] flex flex-col rounded-2xl m-3 bg-white font-sans overflow-hidden">
             <div className="flex-1 overflow-y-auto p-8">
@@ -53,68 +66,53 @@ export default function Storage() {
 
                 {/* Table */}
                 <div className="border border-zinc-200 rounded-3xl overflow-hidden">
-
-                    <div className="grid grid-cols-4 bg-zinc-50 border-b border-zinc-200 px-6 py-4 text-[11px] uppercase tracking-[0.25em] font-black text-zinc-500">
-                        <div>Ingredient</div>
-                        <div>Quantity</div>
-                        <div>Unit</div>
-                        <div>Status</div>
-                    </div>
-
-                    <div className="divide-y divide-zinc-100">
-
-                        {loading ? (
-                            <div className="p-10 text-center text-zinc-400 font-bold uppercase">
-                                Loading storage...
-                            </div>
-                        ) : items.length === 0 ? (
-                            <div className="p-10 text-center text-zinc-400 font-bold uppercase">
-                                Storage empty
-                            </div>
-                        ) : (
-                            items.map(item => {
-
-                                const status = getStatus(item.quantity);
-
-                                return (
-                                    <div
-                                        key={item.id}
-                                        className="grid grid-cols-4 items-center px-6 py-5 hover:bg-zinc-50 transition-colors"
-                                    >
-
-                                        {/* NAME */}
-                                        <div className="font-black uppercase tracking-wide">
-                                            {item.name}
-                                        </div>
-
-                                        {/* QUANTITY */}
-                                        <div className="font-mono text-lg font-bold">
-                                            {item.quantity}
-                                        </div>
-
-                                        {/* UNIT */}
-                                        <div className="text-zinc-500 font-bold uppercase text-sm">
-                                            {item.unit}
-                                        </div>
-
-                                        {/* STATUS */}
-                                        <div>
-                                            <span className={`
-                                                px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
-                                                ${status === "OK"
-                                                    ? "bg-black text-white"
-                                                    : status === "LOW"
-                                                        ? "bg-zinc-200 text-black"
-                                                        : "bg-red-500 text-white"
-                                                }
-                                            `}>
-                                                {status}
-                                            </span>
-                                        </div>
+                    <div className="grid grid-cols-4 divide-x divide-zinc-200">
+                        {Array.from({ length: 4 }, (_, colIndex) => {
+                            const colItems = items.filter((_, i) => i % 4 === colIndex);
+                            return (
+                                <div key={colIndex} className="flex flex-col">
+                                    {/* Column header */}
+                                    <div className="bg-zinc-50 border-b border-zinc-200 px-4 py-4 text-[11px] uppercase tracking-[0.25em] font-black text-zinc-500">
+                                        Ingredient
                                     </div>
-                                );
-                            })
-                        )}
+                                    {/* Column items */}
+                                    <div className="divide-y divide-zinc-100">
+                                        {colItems.map(item => {
+                                            const status = getStatus(item.quantity);
+                                            return (
+                                                <div
+                                                    key={item.code}
+                                                    className="flex items-center justify-between px-4 py-3 hover:bg-zinc-50 transition-colors gap-2"
+                                                >
+                                                    <div className="flex flex-col min-w-0">
+                                                        <span className="font-black uppercase tracking-wide text-xs truncate">
+                                                            {item.name}
+                                                        </span>
+                                                        <span className="font-mono font-bold text-sm text-zinc-700">
+                                                            {item.quantity}
+                                                            <span className="text-zinc-400 font-normal text-[11px] ml-1 uppercase">
+                                                                {item.unit}
+                                                            </span>
+                                                        </span>
+                                                    </div>
+                                                    <span className={`
+                                                        shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest
+                                                        ${status === "OK"
+                                                            ? "bg-black text-white"
+                                                            : status === "LOW"
+                                                                ? "bg-zinc-200 text-black"
+                                                                : "bg-red-500 text-white"
+                                                        }
+                                                    `}>
+                                                        {status}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
