@@ -7,10 +7,7 @@ from redis import Redis
 from psycopg2.extras import Json
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# DB / Redis
-# ─────────────────────────────────────────────────────────────────────────────
-
+# DB connection
 def db_connect():
     return psycopg2.connect(
         host=os.getenv("DB_HOST", "db"),
@@ -24,11 +21,7 @@ redis_h = os.getenv("REDIS_HOST", "localhost")
 redis_p = os.getenv("REDIS_PORT", "6379")
 r = Redis(host=redis_h, port=int(redis_p), decode_responses=True)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────────────────────────────────────
-
+# Helpers 
 def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", text.lower().strip()).strip("_")
 
@@ -51,10 +44,6 @@ def recipe_key_for_modifier(mod_name: str):
 
 
 def database_operator(order_data):
-    """
-    Saves the order first, then we do inventory deduction in a second step.
-    That way the order never disappears even if inventory is blocked.
-    """
     conn = db_connect()
     cursor = conn.cursor()
 
@@ -105,14 +94,6 @@ def load_recipe_items(cur, source_key: str):
 
 
 def build_required_ingredients(cur, order_items):
-    """
-    Turns order items into a single ingredient map:
-    {
-        'tomato_sauce': Decimal('70'),
-        'cheese': Decimal('250'),
-        ...
-    }
-    """
     totals = {}
 
     for item in order_items:
@@ -149,9 +130,6 @@ def build_required_ingredients(cur, order_items):
 
 
 def check_stock(cur, required_totals):
-    """
-    Returns a list of missing items if stock is insufficient.
-    """
     missing = []
 
     for ingredient_code, required_qty in required_totals.items():
@@ -224,10 +202,10 @@ while True:
         order = json.loads(task[1])
         print(f"Processing order: {order}", flush=True)
 
-        # 1) save order to pizza_orders
+        # save order to pizza_orders
         db_order_id = database_operator(order)
 
-        # 2) calculate inventory needs
+        # calculate inventory needs
         conn = db_connect()
         cur = conn.cursor()
 
@@ -266,7 +244,7 @@ while True:
             cur.close()
             conn.close()
 
-        # 3) keep your existing print flow
+        # sending data to the printing step
         r.lpush("print_order", json.dumps({"order_id": db_order_id}))
 
     except json.JSONDecodeError:
