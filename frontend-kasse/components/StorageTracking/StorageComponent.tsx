@@ -78,6 +78,7 @@ export default function Storage() {
                                     {/* Column items */}
                                     <div className="divide-y divide-zinc-100">
                                         {colItems.map(item => {
+                                            // Add status based on quantity and pack into badge 
                                             const status = getStatus(item.quantity);
                                             return (
                                                 <div
