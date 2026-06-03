@@ -1,22 +1,32 @@
 [
     {
         "name" : "Max",
-        "color" : "#88BDF2"
+        "color" : "#88BDF2",
+        "role" : "admin",
+        "code": "312"
     },
     {
         "name" : "Endrick",
-        "color" : "#8686AC"
+        "color" : "#8686AC",
+        "role" : "delivery_staff",
+        "code": "123"
     },
     {
         "name" : "Peter",
-        "color" : "#68BA7F"
+        "color" : "#68BA7F",
+        "role" : "kitchen_staff",
+        "code": "321"
     },
     {
         "name" : "Nick",
-        "color" : "#CD1C18"
+        "color" : "#CD1C18",
+        "role" : "manager",
+        "code": "456"
     },
     {
         "name" : "Yelysei",
-        "color" : "#D3D3FF"
+        "color" : "#D3D3FF",
+        "role" : "kitchen_staff",
+        "code": "330"
     }
 ]

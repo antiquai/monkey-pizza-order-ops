@@ -80,7 +80,6 @@ export default function Storage() {
                                     {/* Column items */}
                                     <div className="divide-y divide-zinc-100">
                                         {colItems.map(item => {
-                                            // Add status based on quantity and pack into badge 
                                             const status = getStatus(item.quantity, item.reorder_level);
                                             return (
                                                 <div
@@ -101,9 +100,9 @@ export default function Storage() {
                                                     <span className={`
                                                         shrink-0 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest
                                                         ${status === "OK"
-                                                            ? "bg-black text-white"
+                                                            ? "bg-green-500 text-white"
                                                             : status === "LOW"
-                                                                ? "bg-zinc-200 text-black"
+                                                                ? "bg-yellow-200 text-white"
                                                                 : "bg-red-500 text-white"
                                                         }
                                                     `}>

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Order } from "./OrderKeeper";
 import { useState } from "react";
 import { Badge } from "./BricksComponent/BadgeComponent";
@@ -23,7 +22,7 @@ export default function ProductCard({ order, onDone, onCancel }: ReceiptProps) {
   };
 
   return (
-    <div className="relative bg-white text-black shadow-md border-t-4 border-black font-mono w-full max-w-sm">
+    <div className="relative bg-white text-black rounded-2xl w-full max-w-sm overflow-hidden shadow-[0_16px_40px_rgb(0,0,0,0.10),0_4px_12px_rgb(0,0,0,0.06)]">
 
       {/* In oven tag*/}
       {isSent ? (
@@ -37,71 +36,55 @@ export default function ProductCard({ order, onDone, onCancel }: ReceiptProps) {
       ) : null}
 
       {/* Header of Receipt */}
-      <div className="text-center border-b border-dashed border-zinc-300 pb-4 mb-4">
-        <Image src="/logo_m.png" alt="Logo" width={40} height={40} className="mx-auto mb-2" />
-        <h2 className="text-md text-blue-950 font-black uppercase">Order #{order.order_id}</h2>
-        <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Kitchen Receipt</p>
-        <p className="font-black text-[20px] uppercase">{order.type_of_delivery}</p>
+      <div className="flex justify-between items-center bg-zinc-100 border-b border-zinc-200 px-4 py-3 ">
+        <h2 className="text-sm font-bold uppercase tracking-wide">ORD-{order.order_id}</h2>
+        <p className="text-sm font-medium uppercase tracking-widest text-zinc-600">Kitchen Receipt</p>
       </div>
-      {/* Client info */}
-      {order.type_of_delivery === 'Lieferservice' && (
-        <div className="space-y-1 mb-4 text-xs uppercase">
-          <p><span className="font-bold">Customer:</span> {order.customer}</p>
-          <p><span className="font-bold">Address:</span> {order.address}</p>
-        </div>
-      )}
       {/* Items List */}
-      <div className="border-b border-dashed border-zinc-300 pb-4 mb-4">
+      <div className="px-4 pt-4 pb-2">
         <p className="text-lg font-bold uppercase mb-2">Items</p>
         {order.items.map((item, index) => (
             <div key={index} className="flex flex-col mb-2 text-sm">
-                {/* Item, qty, price */}
+                {/* Item and qty*/}
                 <div className="flex justify-between items-baseline gap-2">
-                    <span className="font-bold">{item.q}x {item.name}  ({item.size})</span>
-                    {/* Calculate the total price of the item for the receipt */}
-                    <span className="text-xs font-medium">
-                        {((item.base_price + (item.modifiers?.reduce((a,m)=>a+m.price, 0) || 0)) * item.q)}$
-                    </span>
+                  <span className="text-base font-semibold">{item.name} ({item.size})</span>
+                  <span className="text-base font-semibold shrink-0">x{item.q}</span>
                 </div>
         
-                {/* Modification Block */}
+                {/* Modificators */}
                 {item.modifiers && item.modifiers.length > 0 && (
-                    <div className="pl-4 text-md text-black border-l border-zinc-200 mt-1 space-y-0.5">
-                        {item.modifiers.map((mod, mIndex) => (
-                            <div key={mIndex}>+ {mod.name} x {mod.count || 1} ({mod.category})</div>
-                        ))}
-                    </div>
+                  <div className="pl-3 mt-0.5 space-y-0.5">
+                    {item.modifiers.map((mod, mIndex) => (
+                      <div key={mIndex} className="text-sm text-zinc-600">
+                        + {mod.name} x {mod.count || 1} ({mod.category})
+                      </div>
+                    ))}
+                  </div>
                 )}
             </div>
         ))}
       </div>
-      {/* Total */}
-      <div className="flex justify-between font-black text-lg uppercase">
-        <span>Total</span>
-        <span>{order.total_price}$</span>
-      </div>
-      
-      <div className="mt-4 text-center text-[8px] text-zinc-400 uppercase">
-        Ready for production
-      </div>
-      {order.status === 'CANCELLED' ? (
+
+      {/* Button */}
+      <div className="px-4 pb-4">
+        {order.status === 'CANCELLED' ? (
           <button
-            className="w-full mt-2 bg-black text-white hover:bg-zinc-700 transition-all rounded-md text-lg font-bold py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full bg-black text-white hover:bg-zinc-800 transition-colors rounded-xl text-sm font-bold py-3 uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed"
             onClick={handleCancelClick}
             disabled={isSent}
           >
-            TAP TO DELETE 
-          </button> 
-      ) : (
+            Tap to delete
+          </button>
+        ) : (
           <button
-            className="w-full mt-2 bg-black text-white hover:bg-zinc-700 transition-all rounded-md text-lg font-bold py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full bg-black text-white hover:bg-zinc-800 transition-colors rounded-xl text-sm font-bold py-3 uppercase tracking-widest disabled:opacity-40 disabled:cursor-not-allowed"
             onClick={handleClick}
             disabled={isSent}
           >
-            {isSent ? "In the oven ✓" : "To the oven"}
-          </button> 
-        )
-      }
+            {isSent ? "In the oven →" : "To the oven"}
+          </button>
+        )}
+      </div>
     </div>
   );
 };

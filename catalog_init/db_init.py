@@ -59,7 +59,9 @@ CREATE TABLE IF NOT EXISTS shifts (
 CREATE TABLE IF NOT EXISTS personal (
     id    SERIAL PRIMARY KEY,
     name  VARCHAR(100) NOT NULL,
-    color VARCHAR(20)  DEFAULT '#22c55e'
+    color VARCHAR(20)  DEFAULT '#22c55e',
+    role  VARCHAR(50)  NOT NULL DEFAULT 'delivery_staff',
+    code  VARCHAR(50)  UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS timetable (
@@ -122,15 +124,15 @@ CREATE TABLE IF NOT EXISTS inventory_movements (
 );
 
 CREATE TABLE IF NOT EXISTS prep_batches (
-    id         BIGSERIAL PRIMARY KEY,
-    batch_code VARCHAR(100) NOT NULL UNIQUE,
-    batch_type VARCHAR(50)  NOT NULL DEFAULT 'dough',
+    id         BIGSERIAL        PRIMARY KEY,
+    batch_code VARCHAR(100)     NOT NULL UNIQUE,
+    batch_type VARCHAR(50)      NOT NULL DEFAULT 'dough',
     notes      TEXT,
-    created_at TIMESTAMP    DEFAULT NOW()
+    created_at TIMESTAMP        DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS prep_batch_inputs (
-    id               BIGSERIAL PRIMARY KEY,
+    id               BIGSERIAL      PRIMARY KEY,
     batch_id         BIGINT         NOT NULL REFERENCES prep_batches(id) ON DELETE CASCADE,
     ingredient_code  VARCHAR(100)   NOT NULL REFERENCES ingredients(code),
     quantity         NUMERIC(12, 3) NOT NULL,
@@ -138,7 +140,7 @@ CREATE TABLE IF NOT EXISTS prep_batch_inputs (
 );
 
 CREATE TABLE IF NOT EXISTS prep_batch_outputs (
-    id               BIGSERIAL PRIMARY KEY,
+    id               BIGSERIAL      PRIMARY KEY,
     batch_id         BIGINT         NOT NULL REFERENCES prep_batches(id) ON DELETE CASCADE,
     ingredient_code  VARCHAR(100)   NOT NULL REFERENCES ingredients(code),
     quantity         NUMERIC(12, 3) NOT NULL,
@@ -146,36 +148,36 @@ CREATE TABLE IF NOT EXISTS prep_batch_outputs (
 );
 
 CREATE TABLE IF NOT EXISTS recipes (
-    id            BIGSERIAL PRIMARY KEY,
-    source_key    VARCHAR(200) NOT NULL UNIQUE,
-    recipe_type   VARCHAR(20)  NOT NULL CHECK (recipe_type IN ('product', 'modifier')),
+    id            BIGSERIAL         PRIMARY KEY,
+    source_key    VARCHAR(200)      NOT NULL UNIQUE,
+    recipe_type   VARCHAR(20)       NOT NULL CHECK (recipe_type IN ('product', 'modifier')),
     product_name  VARCHAR(255),
     size_key      VARCHAR(50),
     modifier_code VARCHAR(100),
-    active        BOOLEAN      NOT NULL DEFAULT TRUE,
-    created_at    TIMESTAMP    DEFAULT NOW()
+    active        BOOLEAN           NOT NULL DEFAULT TRUE,
+    created_at    TIMESTAMP         DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS recipe_items (
-    id               BIGSERIAL PRIMARY KEY,
+    id               BIGSERIAL      PRIMARY KEY,
     recipe_id        BIGINT         NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
     ingredient_code  VARCHAR(100)   NOT NULL REFERENCES ingredients(code),
     quantity         NUMERIC(12, 3) NOT NULL,
     unit             VARCHAR(20)    NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS delivery (
-    id         BIGSERIAL PRIMARY KEY,
-    delivered_at TIMESTAMP  NOT NULL DEFAULT NOW(),
-    supplier    VARCHAR(255),
-    price       NUMERIC(10, 2),
-    note        TEXT,
-    created_by  VARCHAR(100)
+CREATE TABLE IF NOT EXISTS supply (
+    id              BIGSERIAL   PRIMARY KEY,
+    delivered_at    TIMESTAMP   NOT NULL DEFAULT NOW(),
+    supplier        VARCHAR(255),
+    price           NUMERIC(10, 2),
+    note            TEXT,
+    created_by      VARCHAR(100)
 );
 
-CREATE TABLE IF NOT EXISTS delivery_items (
-    id              BIGSERIAL PRIMARY KEY,
-    delivery_id     BIGINT         NOT NULL REFERENCES delivery(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS supply_items (
+    id              BIGSERIAL      PRIMARY KEY,
+    supply_id       BIGINT         NOT NULL REFERENCES supply(id) ON DELETE CASCADE,
     ingredient_code VARCHAR(100)   NOT NULL REFERENCES ingredients(code),
     quantity        NUMERIC(12, 3) NOT NULL,
     unit            VARCHAR(20)    NOT NULL,
@@ -314,8 +316,8 @@ def _seed_personal(cur: Cursor, staff: list[dict]) -> None:
 
     for person in staff:
         cur.execute(
-            "INSERT INTO personal (name, color) VALUES (%s, %s)",
-            (person["name"], person["color"]),
+            "INSERT INTO personal (name, color, role, code) VALUES (%s, %s, %s, %s)",
+            (person["name"], person["color"], person["role"], person["code"]),
         )
     print(f"personal: {len(staff)} staff members inserted.", flush=True)
 

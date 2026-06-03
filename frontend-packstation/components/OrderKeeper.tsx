@@ -19,6 +19,7 @@ export interface OrderItem {
     q: number;
     base_price: number;
     modifiers?: OrderModifier[];
+    size?: string | null;
 }
 
 export interface Order {
@@ -131,7 +132,7 @@ export default function OrderKeeper() {
             </div>
 
             {/* Orders List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-1 gap-y-0 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
             {orders
                 .sort((a, b) => a.order_id - b.order_id)
                 .map((order) => (

@@ -7,6 +7,8 @@ import { DectructiveAlertComponent } from "./Alert/DesctructiveAlertComponent"
 
 import { toast } from "sonner";
 
+// TODO: Use calendar from shadcn instead of self-wroten
+
 const GATEWAY_URL = "http://192.168.2.35:8000"
 
 export interface StaffMember {
@@ -304,7 +306,7 @@ export default function TimeTableComponent() {
           )}
         </AnimatePresence>
 
-        {/* Staff badges (only in edit mode) */}
+        {/* Staff badges */}
         <AnimatePresence>
           {selectedWeek && mode === "edit" && (
             <motion.div
