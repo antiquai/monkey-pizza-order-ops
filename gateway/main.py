@@ -244,7 +244,43 @@ async def get_orders():
     cursor = conn.cursor()
     cursor.execute("""
         SELECT kitchen_id, customer, address, type_of_delivery, items, total_price, status
-        FROM pizza_orders WHERE shift_name = %s
+        FROM pizza_orders WHERE shift_name = %s 
+        ORDER BY created_at DESC
+        LIMIT 200
+    """, (shift,))   
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    
+    orders = []
+    if rows != None:
+        for row in rows:
+            kitchen_id = row[0]  
+            order_id = int(kitchen_id.replace("order_", "")) if kitchen_id else 0
+            orders.append({
+                "order_id": order_id,
+                "customer": row[1],
+                "address": row[2],
+                "type_of_delivery": row[3],
+                "items": row[4],       
+                "total_price": row[5],
+                "status": row[6],
+            })
+    else:
+        print("No orders found in the database.")
+        
+    return orders
+
+# Fetch all orders from database for kit / pack
+@app.get("/get_orders/kitchen")
+async def get_orders():
+    shift = get_shift_name()
+    conn = db_connect()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT kitchen_id, customer, address, type_of_delivery, items, total_price, status
+        FROM pizza_orders WHERE shift_name = %s AND status IN ('pending', 'in_oven', 'packed')
         ORDER BY created_at DESC
         LIMIT 200
     """, (shift,))   
@@ -541,7 +577,19 @@ async def order_in_oven(data: Status):
     order_id = data.order_id
     
     print(f'Order {order_id} sent to the oven !', flush=True)
+    try:
+        conn = db_connect()
+        cursor = conn.cursor()
+        cursor.execute("""UPDATE pizza_orders SET status = 'in_oven' WHERE kitchen_id = %s""", (f"order_{order_id}",))
+        conn.commit()
+    except Exception as e:
+        print(f"Error occurred while updating order status: {e}", flush=True)
+    finally:
+        cursor.close()
+        conn.close()
+        
     await sio.emit("order_sent_to_oven", {"order_id": order_id}, room='kitchen')
+        
     return {"status": f"Order {order_id} marked as sent to the oven !"}
 
 # When order is packed, send to delivery and update status in database

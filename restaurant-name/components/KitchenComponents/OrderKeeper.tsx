@@ -80,6 +80,18 @@ export default function OrderKeeper() {
         setOrders(prev => prev.filter(o => o.order_id !== orderId));
     }
 
+    // Fetch orders, if network drop
+    useEffect(() => {
+        fetch(`${GATEWAY_URL}/get_orders/kitchen`)
+          .then(r => r.json())
+          .then((data) => {
+            console.log("API response:", data); 
+            setOrders(Array.isArray(data) ? data : data.orders ?? []);
+          })
+          .catch(console.error)
+          .finally(() => console.log("Initial orders fetched"));
+      }, []);
+
     // Socket io connecting
     useEffect(() => {
         socket = io(SOCKET_URL, {
@@ -103,13 +115,7 @@ export default function OrderKeeper() {
 
         socket.on('order_cancelled', (data: { order_id: number }) => {
             console.log('Order cancelled received in kitchen: ', data);
-            setOrders((prevOrders) => 
-                prevOrders.map((order) => 
-                    order.order_id === data.order_id
-                    ? { ...order, status: 'CANCELLED' }
-                    : order
-                )
-            )
+            setOrders(prev => prev.filter(o => o.order_id !== data.order_id));
         })
         
         socket.on('disconnect', () => {

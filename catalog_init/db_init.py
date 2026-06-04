@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS pizza_orders (
     total_price      NUMERIC(10, 2),
     shift_name       VARCHAR(100) DEFAULT NULL,
     status           VARCHAR(50)  NOT NULL DEFAULT 'pending'
-                         CHECK (status IN ('pending', 'in delivery', 'done', 'cancelled')),
+                         CHECK (status IN ('pending', 'in_oven', 'in delivery', 'done', 'cancelled')),
     inventory_status VARCHAR(50)  NOT NULL DEFAULT 'pending'
                          CHECK (inventory_status IN ('pending', 'deducted', 'blocked', 'error')),
     inventory_note   TEXT,

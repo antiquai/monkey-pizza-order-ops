@@ -38,7 +38,6 @@ export default function ProductCard({ order, onDone, onCancel }: ReceiptProps) {
       {/* Header of Receipt */}
       <div className="flex justify-between items-center bg-zinc-100 border-b border-zinc-200 px-4 py-3 ">
         <h2 className="text-sm font-bold uppercase tracking-wide">ORD-{order.order_id}</h2>
-        <p className="text-sm font-medium uppercase tracking-widest text-zinc-600">Kitchen Receipt</p>
       </div>
       {/* Items List */}
       <div className="px-4 pt-4 pb-2">

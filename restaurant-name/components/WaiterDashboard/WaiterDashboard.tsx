@@ -21,6 +21,7 @@ export interface OrderItem {
     q: number;
     base_price: number;
     modifiers?: OrderModifier[];
+    size?: string | null;
 }
 
 export interface Order {
@@ -33,20 +34,20 @@ export interface Order {
     status?: string;
 }
 
-const API_URL = "http://192.168.2.35:8000";
+const  GATEWAY_URL = "http://192.168.2.35:8000";
 
 export default function WaiterDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   const handleCancel = async (orderId: number) => {
-    const sendData = {
+    const sendData = { 
         order_id: orderId,
         statusbar: "cancelled"
     }
 
     try {
-      const response = await fetch(`${API_URL}/cancel_order`, {
+      const response = await fetch(`${GATEWAY_URL}/cancel_order`, {
           method: "POST",
           headers: {
               "Content-Type": "application/json",
@@ -68,7 +69,7 @@ export default function WaiterDashboard() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API_URL}/get_orders`)
+    fetch(`${GATEWAY_URL}/get_orders`)
       .then(r => r.json())
       .then((data) => {
         console.log("API response:", data); 
@@ -78,7 +79,7 @@ export default function WaiterDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const activeOrders    = orders.filter(o => o.status === "pending" );
+  const activeOrders    = orders.filter(o => o.status === "pending" || o.status === "in_oven");
   const deliveryOrders  = orders.filter(o => o.status === "in delivery");
   const archivedOrders  = orders.filter(o => o.status === "done");
   const cancelledOrders = orders.filter(o => o.status === "cancelled");
@@ -99,7 +100,7 @@ export default function WaiterDashboard() {
   return (
     <div className="relative h-[97vh] flex rounded-2xl m-3 bg-white backdrop-blur-xl font-sans overflow-hidden">
       <div className="p-8 w-full max-w-6xl mx-auto overflow-y-auto">
-        <h1 className="text-3xl font-black uppercase mb-8 tracking-tighter">Terminal Monitor</h1>
+        <h1 className="text-3xl font-black uppercase mb-8 tracking-tighter">Order Management</h1>
 
         <Tabs defaultValue="active" className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-8 bg-zinc-100 p-1">

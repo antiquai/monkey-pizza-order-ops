@@ -9,7 +9,7 @@ interface ReceiptProps {
 
 
 export default function ProductCard({ order, onDone }: ReceiptProps) {
-  const isInOven = order.status === 'SENT TO THE OVEN';
+  const isInOven = order.status === 'in_oven';
 
   return (
     <div className={`relative bg-white text-black rounded-2xl w-full max-w-sm overflow-hidden shadow-[0_16px_40px_rgb(0,0,0,0.10),0_4px_12px_rgb(0,0,0,0.06)] ${order.status ? 'bg-blue-500/15' : 'border-black'}`}>
@@ -18,7 +18,7 @@ export default function ProductCard({ order, onDone }: ReceiptProps) {
       <div className="flex justify-between items-center bg-zinc-100 border-b border-zinc-200 px-4 py-3">
         <h2 className="text-sm font-bold uppercase tracking-wide">ORD-{order.order_id}</h2>
         <Badge type={
-          order.status === 'SENT TO THE OVEN' ? 'sent_to_oven' :
+          order.status === 'in_oven' ? 'sent_to_oven' :
           order.status === 'CANCELLED' ? 'cancelled' :
           'pending'
         } />
