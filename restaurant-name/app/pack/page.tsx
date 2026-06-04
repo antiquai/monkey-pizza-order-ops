@@ -1,5 +1,4 @@
-import NavBarComponent from "@/components/NavBarComponent";
-import OrderKeeper from "@/components/OrderKeeper";
+import OrderKeeper from "@/components/PackstationComponents/OrderKeeper";
 
 export default function Home() {
   return (

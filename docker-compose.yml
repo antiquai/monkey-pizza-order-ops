@@ -37,30 +37,10 @@ services:
       - pizza_network
 
   waiter:
-    build: ./frontend-kasse
-    container_name: restaurant_waiter
+    build: ./restaurant-name
+    container_name: restaurant_ui
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://192.168.178.54:8000
-    networks:
-      - pizza_network
-
-  kitchen:
-    build: ./frontend-kitchen
-    container_name: restaurant_kitchen
-    ports:
-      - "3001:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://192.168.178.54:8000
-    networks:
-      - pizza_network
-
-  packstation:
-    build: ./frontend-packstation
-    container_name: restaurant_pack
-    ports:
-      - "3002:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://192.168.178.54:8000
     networks:

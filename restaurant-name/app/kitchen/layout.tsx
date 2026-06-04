@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Manrope } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Packstation App",
-  description: "Packstation App for managing packages built with Next.js and Tailwind CSS",
+  title: "Kitchen App",
+  description: "Kitchen App for restaurants built with Next.js and Tailwind CSS",
 };
 
 export default function RootLayout({

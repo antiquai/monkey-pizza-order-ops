@@ -1,4 +1,4 @@
-import OrderKeeper from "@/components/OrderKeeper";
+import OrderKeeper from "@/components/KitchenComponents/OrderKeeper";
 
 export default function Home() {
   return (
