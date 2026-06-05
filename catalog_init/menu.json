@@ -1,19 +1,19 @@
 {
   "ingredients": [
-    {"code":"dough_ball","name":"Dough ball","unit":"pcs", "category":"Base", "is_modifier": false, "price_modifier": 0.0, "reorder_level": 100},
-    {"code":"tomato_sauce","name":"Tomato sauce","unit":"ml", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 500},
-    {"code":"holland_sauce","name":"Holland sauce","unit":"ml", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 500},
-    {"code":"cheese","name":"Cheese","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 5000},
-    {"code":"tuna","name":"Tuna","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 2000},
-    {"code":"onion","name":"Onion","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 2000},
-    {"code":"salami","name":"Salami","unit":"pcs", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 100},
-    {"code":"ham","name":"Ham","unit":"pcs", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 100},
-    {"code":"broccoli","name":"Broccoli","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 1000},
-    {"code":"sucuk","name":"Sucuk","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 1000},
-    {"code":"cola_03","name":"Cola 0.3","unit":"bottle", "category":"Drink", "is_modifier": true, "price_modifier": 2.0, "reorder_level": 25},
-    {"code":"monster_05","name":"Monster 0.5","unit":"can", "category":"Drink", "is_modifier": true, "price_modifier": 3.0, "reorder_level": 15},
-    {"code":"aioli_dip","name":"Aioli Dip","unit":"pcs", "category":"Dip", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 10},
-    {"code":"ketchup_dip","name":"Ketchup Dip","unit":"pcs", "category":"Dip", "is_modifier": true, "price_modifier": 1.0, "reorder_level": 10}
+    {"code":"dough_ball","name":"Dough ball","unit":"pcs", "category":"Base", "is_modifier": false, "price_modifier": 0.0,"qty_modifier": 0, "reorder_level": 100},
+    {"code":"tomato_sauce","name":"Tomato sauce","unit":"ml", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 50, "reorder_level": 5000},
+    {"code":"holland_sauce","name":"Holland sauce","unit":"ml", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 50, "reorder_level": 5000},
+    {"code":"cheese","name":"Cheese","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 40, "reorder_level": 10000},
+    {"code":"tuna","name":"Tuna","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 50, "reorder_level": 5000},
+    {"code":"onion","name":"Onion","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 60, "reorder_level": 6000},
+    {"code":"salami","name":"Salami","unit":"pcs", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 6, "reorder_level": 800},
+    {"code":"ham","name":"Ham","unit":"pcs", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 6, "reorder_level": 800},
+    {"code":"broccoli","name":"Broccoli","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0,"qty_modifier": 60, "reorder_level": 6000},
+    {"code":"sucuk","name":"Sucuk","unit":"g", "category":"Extra", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 50, "reorder_level": 5000},
+    {"code":"cola_03","name":"Cola 0.3","unit":"bottle", "category":"Drink", "is_modifier": true, "price_modifier": 2.0, "qty_modifier": 1, "reorder_level": 50},
+    {"code":"monster_05","name":"Monster 0.5","unit":"can", "category":"Drink", "is_modifier": true, "price_modifier": 3.0, "qty_modifier": 1, "reorder_level": 50},
+    {"code":"aioli_dip","name":"Aioli Dip","unit":"pcs", "category":"Dip", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 1, "reorder_level": 10},
+    {"code":"ketchup_dip","name":"Ketchup Dip","unit":"pcs", "category":"Dip", "is_modifier": true, "price_modifier": 1.0, "qty_modifier": 1, "reorder_level": 10}
   ],
     "packs": {
         "pizza_base_26": [

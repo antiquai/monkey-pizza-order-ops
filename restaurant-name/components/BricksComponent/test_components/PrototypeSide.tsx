@@ -1,16 +1,17 @@
 'use client'
 
-import { ShoppingBag, LayoutDashboard, BarChart2, Bike, Clock, PowerOff, Store } from "lucide-react"
+import { ShoppingBag, LayoutDashboard, BarChart2, Bike, Clock, PowerOff, Store, Banknote, PiggyBank } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
 
 const items = [
-  { title: "Catalog",   value: "catalog",   icon: ShoppingBag     },
-  { title: "Dashboard", value: "dashboard", icon: LayoutDashboard },
-  { title: "Analytics", value: "analytics", icon: BarChart2       },
-  { title: "Storage",   value: "storage",   icon: Store           },
-  { title: "Delivery",  value: "delivery",  icon: Bike            },
-  { title: "My Time",   value: "time",      icon: Clock           },
+  { title: "Catalog",           value: "catalog",       icon: ShoppingBag     },
+  { title: "Dashboard",         value: "dashboard",     icon: LayoutDashboard },
+  { title: "Analytics",         value: "analytics",     icon: BarChart2       },
+  { title: "Storage",           value: "storage",       icon: Store           },
+  { title: "Delivery",          value: "delivery",      icon: Bike            },
+  { title: "Time Management",   value: "time",          icon: Clock           },
+  { title: "Finance",           value: "finance",       icon: PiggyBank       },
 ]
 
 interface Shift {

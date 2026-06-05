@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS catalog (
 CREATE TABLE IF NOT EXISTS shifts (
     id             SERIAL PRIMARY KEY,
     name           VARCHAR(100) NOT NULL,
-    opened_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
-    closed_at      TIMESTAMP    DEFAULT NULL,
+    opened_at      TIMESTAMPZ    NOT NULL DEFAULT NOW(),
+    closed_at      TIMESTAMPZ    DEFAULT NULL,
     total_duration INTERVAL     GENERATED ALWAYS AS (closed_at - opened_at) STORED
 );
 
@@ -71,14 +71,14 @@ CREATE TABLE IF NOT EXISTS timetable (
     day        VARCHAR(10)  NOT NULL,
     time_slot  VARCHAR(10)  NOT NULL,
     staff_name VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP    DEFAULT NOW()
+    created_at TIMESTAMPZ    DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS timetable_weeks (
     id         SERIAL PRIMARY KEY,
     week_start DATE      NOT NULL UNIQUE,
     week_end   DATE      NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS pizza_orders (
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS pizza_orders (
     inventory_status VARCHAR(50)  NOT NULL DEFAULT 'pending'
                          CHECK (inventory_status IN ('pending', 'deducted', 'blocked', 'error')),
     inventory_note   TEXT,
-    created_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+    created_at       TIMESTAMPZ    DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS ingredients (
@@ -107,9 +107,10 @@ CREATE TABLE IF NOT EXISTS ingredients (
     reorder_level NUMERIC(12, 2) NOT NULL DEFAULT 0,
     is_modifier   BOOLEAN        NOT NULL DEFAULT FALSE,
     price_modifier NUMERIC(10,2) NOT NULL DEFAULT 0,
+    qty_modifier   NUMERIC(10,2) NOT NULL DEFAULT 0,
     active        BOOLEAN        NOT NULL DEFAULT TRUE,
-    created_at    TIMESTAMP      DEFAULT NOW(),
-    updated_at    TIMESTAMP      DEFAULT NOW()
+    created_at    TIMESTAMPZ      DEFAULT NOW(),
+    updated_at    TIMESTAMPZ      DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS inventory_movements (
@@ -120,7 +121,7 @@ CREATE TABLE IF NOT EXISTS inventory_movements (
     ref_type         VARCHAR(50),
     ref_id           VARCHAR(100),
     note             TEXT,
-    created_at       TIMESTAMP      DEFAULT NOW()
+    created_at       TIMESTAMPZ      DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS prep_batches (
@@ -128,7 +129,7 @@ CREATE TABLE IF NOT EXISTS prep_batches (
     batch_code VARCHAR(100)     NOT NULL UNIQUE,
     batch_type VARCHAR(50)      NOT NULL DEFAULT 'dough',
     notes      TEXT,
-    created_at TIMESTAMP        DEFAULT NOW()
+    created_at TIMESTAMPZ        DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS prep_batch_inputs (
@@ -155,7 +156,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     size_key      VARCHAR(50),
     modifier_code VARCHAR(100),
     active        BOOLEAN           NOT NULL DEFAULT TRUE,
-    created_at    TIMESTAMP         DEFAULT NOW()
+    created_at    TIMESTAMPZ        DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS recipe_items (
@@ -193,20 +194,21 @@ def _apply_ddl(cur: Cursor) -> None:
 
 # Inventory helpers
 
-def _upsert_ingredient(cur: Cursor, code: str, name: str, unit: str, category: str , is_modifier: bool | None = None, price_modifier: float | None = None, reorder_level=0.0) -> None:
+def _upsert_ingredient(cur: Cursor, code: str, name: str, unit: str, category: str , is_modifier: bool | None = None, price_modifier: float | None = None, qty_modifier: float | None = None, reorder_level: float = 0.0) -> None:
     cur.execute(
         """
-        INSERT INTO ingredients (code, name, unit, category, is_modifier, price_modifier, reorder_level)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO ingredients (code, name, unit, category, is_modifier, price_modifier, qty_modifier, reorder_level)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (code) DO UPDATE SET
             name = EXCLUDED.name,
             unit = EXCLUDED.unit,
             category = EXCLUDED.category,
             is_modifier = EXCLUDED.is_modifier,
             price_modifier = EXCLUDED.price_modifier,
+            qty_modifier = EXCLUDED.qty_modifier,
             reorder_level  = EXCLUDED.reorder_level
         """,
-        (code, name, unit, category, is_modifier, price_modifier, reorder_level),
+        (code, name, unit, category, is_modifier, price_modifier, qty_modifier, reorder_level),
     )
 
 
@@ -329,7 +331,7 @@ def _seed_ingredients(cur: Cursor, ingredients: list[dict]) -> None:
         return
 
     for ing in ingredients:
-        _upsert_ingredient(cur, ing["code"], ing["name"], ing["unit"], ing.get("category"), ing.get("is_modifier", False), ing.get("price_modifier", 1.0), ing.get("reorder_level", 0.0))
+        _upsert_ingredient(cur, ing["code"], ing["name"], ing["unit"], ing.get("category"), ing.get("is_modifier", False), ing.get("price_modifier", 1.0), ing.get("qty_modifier", 0.0), ing.get("reorder_level", 0.0))
     print(f"ingredients: {len(ingredients)} rows inserted.", flush=True)
 
 
@@ -337,7 +339,7 @@ def _seed_recipes(
     cur: Cursor,
     items: list[dict],
     packs: dict[str, list],
-    modifiers: dict[str, list],
+    ingredients: list[dict],
 ) -> None:
     cur.execute("SELECT COUNT(*) FROM recipes;")
     if cur.fetchone()[0] > 0:
@@ -374,15 +376,20 @@ def _seed_recipes(
             recipe_count += 1
 
     #Modifiers
-    for modifier_code, entries in modifiers.items():
-        source_key = f"modifier:{modifier_code}"
+    for ing in ingredients:
+        if not ing.get("is_modifier", False):
+            continue
+        modifier_qty = ing.get("qty_modifier", 0.0)
+        if not modifier_qty or modifier_qty <= 0:
+            continue
+
+        source_key = f"modifier:{ing['code']}"
         recipe_id = _create_recipe(
-            cur, source_key, "modifier", modifier_code=modifier_code
+            cur, source_key, "modifier", modifier_code=ing["code"]
         )
         if recipe_id is None:
             continue
-        for entry in entries:
-            _add_recipe_item(cur, recipe_id, entry["ingredient"], entry["qty"], entry["unit"])
+        _add_recipe_item(cur, recipe_id, ing["code"], float(modifier_qty), ing["unit"])
         recipe_count += 1
 
     print(f"recipes: {recipe_count} recipes generated.", flush=True)
@@ -396,20 +403,20 @@ def _seed_opening_stock(cur: Cursor) -> None:
 
     # Opening stock entries 
     opening_stock: list[tuple[str, float, str]] = [
-        ("dough_ball",    50,    "50 pre-made dough balls"),
-        ("tomato_sauce",  8000,  "8 L tomato sauce"),
-        ("holland_sauce", 3000,  "3 L holland sauce"),
-        ("cheese",        10000, "10 kg cheese"),
-        ("tuna",          2000,  "2 kg tuna"),
-        ("onion",         2000,  "2 kg onion"),
-        ("salami",        200,   "200 slices salami"),
+        ("dough_ball",    150,    "50 pre-made dough balls"),
+        ("tomato_sauce",  10000,  "10 L tomato sauce"),
+        ("holland_sauce", 5000,  "5 L holland sauce"),
+        ("cheese",        10500, "10,5 kg cheese"),
+        ("tuna",          5000,  "5 kg tuna"),
+        ("onion",         7000,  "7 kg onion"),
+        ("salami",        250,   "250 slices salami"),
         ("ham",           200,   "200 slices ham"),
-        ("broccoli",      3000,  "3 kg broccoli"),
+        ("broccoli",      4500,  "4,5 kg broccoli"),
         ("sucuk",         2000,  "2 kg sucuk"),
         ("cola_03",       48,    "4 packs × 12 bottles"),
         ("monster_05",    24,    "24 cans"),
-        ("aioli_dip",     30,    "30 aioli dip portions"),
-        ("ketchup_dip",   30,    "30 ketchup dip portions"),
+        ("aioli_dip",     20,    "20 aioli dip portions"),
+        ("ketchup_dip",   20,    "20 ketchup dip portions"),
     ]
 
     for code, delta, note in opening_stock:
@@ -440,7 +447,7 @@ def init() -> None:
 
         _seed_ingredients(cur, menu["ingredients"])
 
-        _seed_recipes(cur, menu["items"], menu["packs"], menu.get("modifiers", {}))
+        _seed_recipes(cur, menu["items"], menu["packs"], menu["ingredients"])
 
         _seed_opening_stock(cur)
 

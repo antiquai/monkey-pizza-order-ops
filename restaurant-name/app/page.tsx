@@ -12,6 +12,7 @@ import AdminDashboard from "@/components/AdminDashboard/AdminDashboardComponent"
 import TimeTableComponent from "@/components/TimeTable/TimeTableComponent";
 import Storage from "@/components/StorageTracking/StorageComponent";
 import DeliveryComponent from "@/components/DeliveryDashborad/DeliveryComponent";
+import FinanceComponent from "@/components/FinanceDashboard/FinanceComponent";
 
 const GATEWAY_URL = "http://192.168.2.35:8000"
 
@@ -153,12 +154,13 @@ export default function Home() {
     <div className="flex w-full h-auto bg-zinc-100">
       <PrototypeSidebarComponent activeTab={activeTab} onTabChange={setActiveTab} shift={shift} onCloseShift={handleCloseShift}/>
       <main className="flex-1 min-w-0 ">
-        {activeTab === 'catalog'   && <Catalog />}
-        {activeTab === 'dashboard' && <WaiterDashboard />}
-        {activeTab === 'analytics' && <AdminDashboard />}
-        {activeTab === 'storage' && <Storage />}
-        {activeTab === 'delivery'  && <DeliveryComponent />}
-        {activeTab === 'time'      && <TimeTableComponent />}
+        {activeTab === 'catalog'    && <Catalog />}
+        {activeTab === 'dashboard'  && <WaiterDashboard />}
+        {activeTab === 'analytics'  && <AdminDashboard />}
+        {activeTab === 'storage'    && <Storage />}
+        {activeTab === 'delivery'   && <DeliveryComponent />}
+        {activeTab === 'time'       && <TimeTableComponent />}
+        {activeTab === 'finance'    && <FinanceComponent />}
       </main>
     </div>
   );

@@ -119,7 +119,7 @@ def build_required_ingredients(cur, order_items):
             if mod_count <= 0:
                 continue
 
-            mod_key = f"modifier:{mod.get('code', '')}"
+            mod_key = recipe_key_for_modifier(mod.get('code', ''))
             _, mod_recipe_items = load_recipe_items(cur, mod_key)
             if not mod_recipe_items:
                 continue  

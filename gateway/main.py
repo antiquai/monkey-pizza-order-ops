@@ -81,6 +81,7 @@ class StaffMember(BaseModel):
     
 # Order of Items list in Order
 class Modifier(BaseModel):
+    code: str
     name: str
     price: float
     category: str 
@@ -535,6 +536,12 @@ def get_timetable_weeks():
     rows = cur.fetchall()
     cur.close(); conn.close()
     return [{"id": r[0], "week_start": str(r[1]), "week_end": str(r[2])} for r in rows]
+
+# TODO: Implement upload timetable into supabase, cloud storing for staff app (Teble in Supa already setted up)
+@app.post("/timetable/upload")
+def upload_timetable():
+    # Implementation for uploading timetable
+    pass
 
 # Route to receive order from frontend 
 @app.post("/checkout")

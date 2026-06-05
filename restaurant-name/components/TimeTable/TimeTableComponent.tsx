@@ -6,6 +6,7 @@ import TableComponent from "./TableComponent"
 import { DectructiveAlertComponent } from "./Alert/DesctructiveAlertComponent"
 
 import { toast } from "sonner";
+import { AlertComponent } from "./Alert/AlertComponent"
 
 // TODO: Use calendar from shadcn instead of self-wroten
 
@@ -158,6 +159,23 @@ export default function TimeTableComponent() {
     await fetch(`${GATEWAY_URL}/timetable/entry/${entryId}`, { method: "DELETE" })
     setEntries(prev => prev.filter(e => e.id !== entryId))
   }
+  
+  const handleSubmit = async () => {
+    setMode(m => m === "view" ? "edit" : "view")
+
+    try {
+      const res = await fetch(`${GATEWAY_URL}/timetable/upload`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+
+      if (res.ok) {
+        toast.custom(() => <div className="w-full flex justify-center"><AlertComponent /></div>);
+      }
+    }catch (e) {
+      console.error(e)
+    }
+  }
 
   return (
     <div className="relative min-h-[97vh] flex flex-col rounded-2xl m-3 bg-white font-sans overflow-hidden">
@@ -214,7 +232,7 @@ export default function TimeTableComponent() {
             {/* Edit */}
             {selectedWeek && (
               <button
-                onClick={() => setMode(m => m === "view" ? "edit" : "view")}
+                onClick={() => handleSubmit()}
                 className={`px-4 py-2 text-xs font-black uppercase rounded-xl border-2 transition-all ${
                   mode === "edit"
                     ? "border-black bg-black text-white"
