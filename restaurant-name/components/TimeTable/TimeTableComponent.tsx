@@ -8,6 +8,13 @@ import { DectructiveAlertComponent } from "./Alert/DesctructiveAlertComponent"
 import { toast } from "sonner";
 import { AlertComponent } from "./Alert/AlertComponent"
 
+import { format, parseISO } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+
 // TODO: Use calendar from shadcn instead of self-wroten
 
 const GATEWAY_URL = "http://192.168.2.35:8000"
@@ -254,7 +261,7 @@ export default function TimeTableComponent() {
         </div>
 
         {/* Create form */}
-        <AnimatePresence>
+        {/* <AnimatePresence>
           {showCreateForm && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -291,6 +298,85 @@ export default function TimeTableComponent() {
                 <button
                   onClick={() => setShowCreateForm(false)}
                   className="px-6 py-2 bg-white text-black text-sm font-black uppercase tracking-widest rounded-xl hover:bg-[#121212] hover:text-white transition-all disabled:opacity-40"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence> */}
+        <AnimatePresence>
+          {showCreateForm && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden mb-6"
+            >
+              <div className="flex items-end gap-3 bg-zinc-50 border border-zinc-200 rounded-2xl p-4 w-fit">
+                
+                {/* Shadcn Calendar for 'Week Start' */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">From</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[160px] justify-start text-left font-medium text-sm rounded-xl border-zinc-200 bg-white h-10 outline-none hover:bg-white focus:border-black transition-all",
+                          !weekStart && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4 text-zinc-400" />
+                        {weekStart ? format(parseISO(weekStart), "yyyy-MM-dd") : <span>Pick date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={weekStart ? parseISO(weekStart) : undefined}
+                        onSelect={(date) => setWeekStart(date ? format(date, "yyyy-MM-dd") : "")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Shadcn Calendar for 'Week End' */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">To</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[160px] justify-start text-left font-medium text-sm rounded-xl border-zinc-200 bg-white h-10 outline-none hover:bg-white focus:border-black transition-all",
+                          !weekEnd && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4 text-zinc-400" />
+                        {weekEnd ? format(parseISO(weekEnd), "yyyy-MM-dd") : <span>Pick date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={weekEnd ? parseISO(weekEnd) : undefined}
+                        onSelect={(date) => setWeekEnd(date ? format(date, "yyyy-MM-dd") : "")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <button
+                  onClick={handleCreateTable}
+                  disabled={!weekStart || !weekEnd || creating}
+                  className="px-6 py-2 h-10 bg-black text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-zinc-800 transition-all disabled:opacity-40"
+                >
+                  {creating ? "..." : "Create"}
+                </button>
+                <button
+                  onClick={() => setShowCreateForm(false)}
+                  className="px-6 py-2 h-10 bg-white text-black text-sm font-black uppercase tracking-widest rounded-xl hover:bg-[#121212] hover:text-white border border-zinc-200 transition-all disabled:opacity-40"
                 >
                   Cancel
                 </button>
