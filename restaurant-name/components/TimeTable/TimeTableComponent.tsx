@@ -15,8 +15,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-// TODO: Use calendar from shadcn instead of self-wroten
-
 const GATEWAY_URL = "http://192.168.2.35:8000"
 
 export interface StaffMember {
