@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS catalog (
 CREATE TABLE IF NOT EXISTS shifts (
     id             SERIAL PRIMARY KEY,
     name           VARCHAR(100) NOT NULL,
-    opened_at      TIMESTAMPZ    NOT NULL DEFAULT NOW(),
-    closed_at      TIMESTAMPZ    DEFAULT NULL,
+    opened_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+    closed_at      TIMESTAMPTZ    DEFAULT NULL,
     total_duration INTERVAL     GENERATED ALWAYS AS (closed_at - opened_at) STORED
 );
 
@@ -71,14 +71,14 @@ CREATE TABLE IF NOT EXISTS timetable (
     day        VARCHAR(10)  NOT NULL,
     time_slot  VARCHAR(10)  NOT NULL,
     staff_name VARCHAR(100) NOT NULL,
-    created_at TIMESTAMPZ    DEFAULT NOW()
+    created_at TIMESTAMPTZ    DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS timetable_weeks (
     id         SERIAL PRIMARY KEY,
     week_start DATE      NOT NULL UNIQUE,
     week_end   DATE      NOT NULL,
-    created_at TIMESTAMPZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS pizza_orders (
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS pizza_orders (
     inventory_status VARCHAR(50)  NOT NULL DEFAULT 'pending'
                          CHECK (inventory_status IN ('pending', 'deducted', 'blocked', 'error')),
     inventory_note   TEXT,
-    created_at       TIMESTAMPZ    DEFAULT NOW()
+    created_at       TIMESTAMPTZ    DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS ingredients (
@@ -109,8 +109,8 @@ CREATE TABLE IF NOT EXISTS ingredients (
     price_modifier NUMERIC(10,2) NOT NULL DEFAULT 0,
     qty_modifier   NUMERIC(10,2) NOT NULL DEFAULT 0,
     active        BOOLEAN        NOT NULL DEFAULT TRUE,
-    created_at    TIMESTAMPZ      DEFAULT NOW(),
-    updated_at    TIMESTAMPZ      DEFAULT NOW()
+    created_at    TIMESTAMPTZ      DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ      DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS inventory_movements (
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS inventory_movements (
     ref_type         VARCHAR(50),
     ref_id           VARCHAR(100),
     note             TEXT,
-    created_at       TIMESTAMPZ      DEFAULT NOW()
+    created_at       TIMESTAMPTZ      DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS prep_batches (
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS prep_batches (
     batch_code VARCHAR(100)     NOT NULL UNIQUE,
     batch_type VARCHAR(50)      NOT NULL DEFAULT 'dough',
     notes      TEXT,
-    created_at TIMESTAMPZ        DEFAULT NOW()
+    created_at TIMESTAMPTZ        DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS prep_batch_inputs (
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     size_key      VARCHAR(50),
     modifier_code VARCHAR(100),
     active        BOOLEAN           NOT NULL DEFAULT TRUE,
-    created_at    TIMESTAMPZ        DEFAULT NOW()
+    created_at    TIMESTAMPTZ        DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS recipe_items (
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS recipe_items (
 
 CREATE TABLE IF NOT EXISTS supply (
     id              BIGSERIAL   PRIMARY KEY,
-    delivered_at    TIMESTAMP   NOT NULL DEFAULT NOW(),
+    delivered_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
     supplier        VARCHAR(255),
     price           NUMERIC(10, 2),
     note            TEXT,

@@ -17,6 +17,8 @@ import psycopg2
 
 from datetime import datetime
 
+# TODO: Make shift/close close all the sockets
+
 r_h = str(os.getenv("REDIS_HOST", "redis"))
 r_p = int(os.getenv("REDIS_PORT", "6379"))
 
