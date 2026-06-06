@@ -34,7 +34,6 @@ app.add_middleware(
 )
 
 # Common function 
-
 def db_connect():
     return psycopg2.connect(
         host=os.getenv("DB_HOST", "db"),
@@ -61,8 +60,14 @@ def get_shift_from_db() -> str:
     conn.close()
     return row[0] if row else None
 
-# Time Table 
 
+# Supply model
+class Supply(BaseModel):
+    ing_name: str
+    sup: str
+    amount: int
+
+# Time Table models
 # TimeTable placeholder
 class TimetableEntry(BaseModel):
     week_start: str
@@ -80,7 +85,8 @@ class TimetableCreate(BaseModel):
 class StaffMember(BaseModel):
     name: str
     color: str = "#22c55e"
-    
+
+# Orders models  
 # Order of Items list in Order
 class Modifier(BaseModel):
     code: str
@@ -182,8 +188,8 @@ def get_current_shift():
         raise HTTPException(status_code=404, detail="No open shift found.")
     return {"id": row[0], "name": row[1], "opened_at": row[2].isoformat()}
     
-
-# Loading catalog from database
+# Items routses
+# Loading catalog and modifiers from database
 @app.get("/load_catalog")
 async def load_catalog():
     try:
@@ -212,8 +218,8 @@ async def load_catalog():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/get_modifiers")
-async def get_modifiers():
+@app.get("/load_modifiers")
+async def load_modifiers():
     try:
         conn = db_connect()
         cur = conn.cursor()
@@ -239,6 +245,7 @@ async def get_modifiers():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Orders sinchronization routes
 # Fetch all orders from database
 @app.get("/get_orders")
 async def get_orders():
@@ -311,6 +318,7 @@ async def get_orders():
         
     return orders
 
+# Analytics routes
 @app.get("/admin_dashboard/analytics")
 def get_admin_dashboard_analytics():
     try:
@@ -411,7 +419,7 @@ def get_admin_dashboard_analytics():
         raise HTTPException(status_code=500, detail=str(e))
         
 
-# GET storage
+# Storage routes
 @app.get("/storage")
 def get_storage():
 
@@ -448,7 +456,15 @@ def get_storage():
         for r in rows
     ]
 
-# GET all stuff
+# TODO: Add supply logic (updating db) || Refreshing site to new data shows up
+@app.post("/supply")
+def supply(supply: Supply):
+    
+    clean_data = jsonable_encoder(supply) 
+    
+    print(f'Supply: {clean_data}')
+
+# Staff routes
 @app.get("/personal")
 def get_personal():
     conn = db_connect()
@@ -458,7 +474,7 @@ def get_personal():
     cur.close(); conn.close()
     return [{"id": r[0], "name": r[1], "color": r[2]} for r in rows]
 
-# POST all stuff
+# Staff routes
 @app.post("/personal")
 def add_personal(data: StaffMember):
     conn = db_connect()
@@ -471,7 +487,7 @@ def add_personal(data: StaffMember):
     conn.commit(); cur.close(); conn.close()
     return {"id": new_id, "name": data.name, "color": data.color}
 
-# GET timetable for week
+# Timemanagment routes
 @app.get("/timetable")
 def get_timetable(week_start: str):
     conn = db_connect()
@@ -486,7 +502,7 @@ def get_timetable(week_start: str):
     cur.close(); conn.close()
     return [{"id": r[0], "day": r[1], "time_slot": r[2], "staff_name": r[3]} for r in rows]
 
-# POST create timetable (just registers the week)
+# POST create new week for timetable
 @app.post("/timetable/create")
 def create_timetable(data: TimetableCreate):
     conn = db_connect()
@@ -545,6 +561,7 @@ def upload_timetable():
     # Implementation for uploading timetable
     pass
 
+# Order manipulations routes
 # Route to receive order from frontend 
 @app.post("/checkout")
 async def checkout(data: Order):
@@ -612,7 +629,7 @@ async def order_packed(data: StatusUpdate):
 
     r.lpush("update_status", json.dumps({"order_id": order_id, "type_of_delivery": type_of_delivery, "shift_name": shift_name}))
 
-# Cancel order in emerhency case 
+# Cancel order in emergency case 
 @app.post("/cancel_order")
 async def cancel_order(data: Status):
     shift_name = get_shift_from_db()
