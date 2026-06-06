@@ -20,6 +20,8 @@ interface Props {
   onOrderComplete: () => void;
 }
 
+const GATEWAY_URL = "http://192.168.2.35:8000";
+
 export default function PrimerCart({ items, onRemove, onClear, deliveryType, onOrderComplete }: Props) {
   const [user_name, setUserName] = useState("");
   const [address, setAddress] = useState("");
@@ -54,12 +56,12 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
     };
 
     try {
-      const response = await fetch("http://192.168.2.35:8000/checkout", {
+      const res = await fetch(`${GATEWAY_URL}/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       });
-      if (response.ok) {
+      if (res.ok) {
         toast.custom(() => <div className="w-full flex justify-center"><AlertComponent /></div>);
         setAddress("");
         setUserName("");

@@ -78,7 +78,7 @@ export default function TimeTableComponent() {
       const res = await fetch(`${GATEWAY_URL}/timetable/weeks`)
       const data = await res.json()
       setWeeks(data)
-      // Auto-select the most recent week
+      
       if (data.length > 0) {
         const latest = data[0]
         setSelectedWeek(latest)
@@ -138,17 +138,20 @@ export default function TimeTableComponent() {
 
   const handleDrop = async (day: string, timeSlot: string) => {
     if (!draggedName || !selectedWeek || mode !== "edit") return
+
+    const sendData = {
+      week_start: selectedWeek.week_start,
+      week_end: selectedWeek.week_end,
+      day,
+      time_slot: timeSlot,
+      staff_name: draggedName
+    }
+
     try {
       const res = await fetch(`${GATEWAY_URL}/timetable/entry`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          week_start: selectedWeek.week_start,
-          week_end: selectedWeek.week_end,
-          day,
-          time_slot: timeSlot,
-          staff_name: draggedName
-        })
+        body: JSON.stringify(sendData)
       })
       const newEntry = await res.json()
       setEntries(prev => [...prev, newEntry])
@@ -259,50 +262,6 @@ export default function TimeTableComponent() {
         </div>
 
         {/* Create form */}
-        {/* <AnimatePresence>
-          {showCreateForm && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden mb-6"
-            >
-              <div className="flex items-end gap-3 bg-zinc-50 border border-zinc-200 rounded-2xl p-4 w-fit">
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">From</label>
-                  <input
-                    type="date"
-                    value={weekStart}
-                    onChange={e => setWeekStart(e.target.value)}
-                    className="px-3 py-2 border border-zinc-200 rounded-xl text-sm font-medium outline-none focus:border-black transition-all bg-white"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">To</label>
-                  <input
-                    type="date"
-                    value={weekEnd}
-                    onChange={e => setWeekEnd(e.target.value)}
-                    className="px-3 py-2 border border-zinc-200 rounded-xl text-sm font-medium outline-none focus:border-black transition-all bg-white"
-                  />
-                </div>
-                <button
-                  onClick={handleCreateTable}
-                  disabled={!weekStart || !weekEnd || creating}
-                  className="px-6 py-2 bg-black text-white text-sm font-black uppercase tracking-widest rounded-xl hover:bg-zinc-800 transition-all disabled:opacity-40"
-                >
-                  {creating ? "..." : "Create"}
-                </button>
-                <button
-                  onClick={() => setShowCreateForm(false)}
-                  className="px-6 py-2 bg-white text-black text-sm font-black uppercase tracking-widest rounded-xl hover:bg-[#121212] hover:text-white transition-all disabled:opacity-40"
-                >
-                  Cancel
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence> */}
         <AnimatePresence>
           {showCreateForm && (
             <motion.div

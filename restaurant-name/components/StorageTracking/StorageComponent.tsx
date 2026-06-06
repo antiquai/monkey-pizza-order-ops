@@ -2,8 +2,9 @@
 
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import AddSupply from "./AddSupplyComponent";
 
-interface StorageItem {
+export interface StorageItem {
     id: number;
     code: string;
     name: string;
@@ -20,6 +21,10 @@ export default function Storage() {
     const [items, setItems] = useState<StorageItem[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const [addSupply, setAddSupply] = useState<{
+        isOpen: boolean;
+      }>({ isOpen: false });
+
     useEffect(() => {
         fetch(`${GATEWAY_URL}/storage`)
             .then(res => res.json())
@@ -34,6 +39,10 @@ export default function Storage() {
         if (status_tresholds <= 100 && status_tresholds > 20) return "LOW";
         return "CRITICAL";
     };
+
+    const handleSupply = async () => {
+        setAddSupply({ isOpen: true })
+    }
 
     if (loading) {
         return(
@@ -57,12 +66,21 @@ export default function Storage() {
                         <p className="text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-bold mt-2">
                             Real-time ingredient inventory
                         </p>
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-zinc-400 font-bold mt-2"> 
+                            NOTE: Critical and below is amount of ingridients, that would be enough for 100 pizzas in size of 26
+                        </p>
                     </div>
 
                     <div className="border-2 border-black px-5 py-3 rounded-2xl">
                         <p className="text-xs uppercase font-black tracking-widest">
                             {items.length} Items
                         </p>
+                        <button 
+                            className="px-4 py-2 text-xs font-black uppercase rounded-xl border-2 transition-all border-black bg-black text-white"
+                            onClick={() => handleSupply()}
+                        >
+                            + Supply
+                        </button>
                     </div>
                 </div>
 
@@ -117,6 +135,10 @@ export default function Storage() {
                         })}
                     </div>
                 </div>
+
+                {addSupply && (
+                    <AddSupply items={items.map(item => item.name)} isOpen={addSupply.isOpen} onClose={() => setAddSupply({isOpen:false})} />
+                )}
             </div>
         </div>
     );

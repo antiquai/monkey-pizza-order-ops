@@ -27,7 +27,7 @@ export default function ModifierSelector({ product, isOpen, onClose, onConfirm }
     const hasSizes = product.sizes && product.sizes.length > 0;
 
     useEffect(() => {
-        fetch(`${GATEWAY_URL}/get_modifiers`)
+        fetch(`${GATEWAY_URL}/load_modifiers`)
             .then(res => res.json())
             .then(data => {
                 console.log("modifiers response:", data); 
@@ -87,7 +87,7 @@ export default function ModifierSelector({ product, isOpen, onClose, onConfirm }
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-106.25 p-0 overflow-hidden border-none text-black">
+            <DialogContent className="sm:max-w-106.25 p-0 overflow-hidden border-none rounded-2xl text-black">
                 <DialogHeader className="p-6 pb-2">
                     <div className="flex justify-between items-center gap-4">
                         <DialogTitle className="text-2xl font-bold uppercase tracking-tighter">
@@ -210,7 +210,7 @@ export default function ModifierSelector({ product, isOpen, onClose, onConfirm }
                     <Button
                         onClick={handleSave}
                         disabled={!canConfirm}
-                        className="relative overflow-hidden rounded-none bg-black px-12 py-6 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="relative overflow-hidden rounded-xl bg-black px-12 py-6 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {hasSizes && !selectedSize ? "Choose a size first" : "Confirm"}
                     </Button>
