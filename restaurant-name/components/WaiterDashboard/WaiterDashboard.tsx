@@ -34,7 +34,7 @@ export interface Order {
     status?: string;
 }
 
-const  GATEWAY_URL = "http://192.168.2.35:8000";
+const  GATEWAY_URL = "http://192.168.2.32:8000";
 
 export default function WaiterDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);

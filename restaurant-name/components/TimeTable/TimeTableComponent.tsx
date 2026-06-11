@@ -15,7 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-const GATEWAY_URL = "http://192.168.2.35:8000"
+const GATEWAY_URL = "http://192.168.2.32:8000"
 
 export interface StaffMember {
   id: number

@@ -36,7 +36,7 @@ export interface CartItem extends Product {
   modifiers?: Modifier[];
 }
 
-const GATEWAY_URL = "http://192.168.2.35:8000";
+const GATEWAY_URL = "http://192.168.2.32:8000";
 const DELIVERY_TYPES = ["Lieferservice", "Zum Mitnehmen", "Restaurant"];
 
 function normaliseSizes(raw: Record<string, { price: number }> | null | undefined): ProductSize[] | undefined {

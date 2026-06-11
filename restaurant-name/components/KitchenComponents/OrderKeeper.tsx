@@ -33,8 +33,8 @@ export interface Order {
     status?: string;
 }
 
-const SOCKET_URL = "http://192.168.2.35:8000";
-const GATEWAY_URL = "http://192.168.2.35:8000";
+const SOCKET_URL = "http://192.168.2.32:8000";
+const GATEWAY_URL = "http://192.168.2.32:8000";
 let socket: Socket;
 
 export default function OrderKeeper() {

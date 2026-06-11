@@ -33,7 +33,7 @@ interface DashboardData {
 
 type Period = "3m" | "30d" | "7d"
 
-const GATEWAY_URL = "http://192.168.2.35:8000";
+const GATEWAY_URL = "http://192.168.2.32:8000";
 
 
 export default function AdminDashboard() {

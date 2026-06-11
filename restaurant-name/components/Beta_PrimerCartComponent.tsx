@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CartItem, Modifier } from "./Beta_Catalog"; 
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 import { AlertComponent } from "./BricksComponent/AlertComponents/AlertComponent";
 import { DectructiveAlertComponent } from "./BricksComponent/AlertComponents/DesctructiveAlertComponent";
@@ -20,7 +19,7 @@ interface Props {
   onOrderComplete: () => void;
 }
 
-const GATEWAY_URL = "http://192.168.2.35:8000";
+const GATEWAY_URL = "http://192.168.2.32:8000";
 
 export default function PrimerCart({ items, onRemove, onClear, deliveryType, onOrderComplete }: Props) {
   const [user_name, setUserName] = useState("");

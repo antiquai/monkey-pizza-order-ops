@@ -16,7 +16,7 @@ interface Props {
     onClose: () => void
 }
 
-const GATEWAY_URL = "http://192.168.2.35:8000";
+const GATEWAY_URL = "http://192.168.2.32:8000";
 
 export default function AddSupply({ items, isOpen, onClose } : Props) {
     const [ingName, setIngName] = useState<string>("")

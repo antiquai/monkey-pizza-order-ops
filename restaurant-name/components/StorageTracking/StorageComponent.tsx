@@ -14,7 +14,7 @@ export interface StorageItem {
     updated_at: string;
 }
 
-const GATEWAY_URL = "http://192.168.2.35:8000";
+const GATEWAY_URL = "http://192.168.2.32:8000";
 
 export default function Storage() {
 

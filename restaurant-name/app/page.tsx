@@ -14,7 +14,7 @@ import Storage from "@/components/StorageTracking/StorageComponent";
 import DeliveryComponent from "@/components/DeliveryDashborad/DeliveryComponent";
 import FinanceComponent from "@/components/FinanceDashboard/FinanceComponent";
 
-const GATEWAY_URL = "http://192.168.2.35:8000"
+const GATEWAY_URL = "http://192.168.2.32:8000"
 
 interface Shift {
   id: number
