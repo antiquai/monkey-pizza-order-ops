@@ -1,5 +1,6 @@
 import json
 import os
+import httpx
 
 from typing import List, Optional
 
@@ -217,6 +218,50 @@ async def load_catalog():
         ]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/places/autocomplete")
+async def places_autocomplete(input: str, sessiontoken: str):
+    url = "https://places.googleapis.com/v1/places:autocomplete"
+    
+    payload = {
+        "input": input,
+        "sessionToken": sessiontoken,
+        "languageCode": "de",
+        "includedRegionCodes": ["de"], 
+        "locationRestriction": {
+            "rectangle": {
+                "low": {"latitude": 52.95, "longitude": 8.55},
+                "high": {"latitude": 53.28, "longitude": 9.20}
+            }
+        }
+    }
+    
+    headers = {
+        "X-Goog-Api-Key": os.getenv("GOOGLE_MAPS_KEY"),
+        "Content-Type": "application/json"
+    }
+    
+    async with httpx.AsyncClient() as client:
+        r = await client.post(url, json=payload, headers=headers)
+    
+    google_data = r.json()
+    
+    predictions = []
+    for suggestion in google_data.get("suggestions", []):
+        place_prediction = suggestion.get("placePrediction", {})
+        text_data = place_prediction.get("text", {})
+        structured = place_prediction.get("structuredFormat", {})
+        
+        predictions.append({
+            "place_id": place_prediction.get("placeId"),
+            "description": text_data.get("text"),
+            "structured_formatting": {
+                "main_text": structured.get("mainText", {}).get("text"),
+                "secondary_text": structured.get("secondaryText", {}).get("text")
+            }
+        })
+        
+    return {"predictions": predictions}
     
 @app.get("/load_modifiers")
 async def load_modifiers():

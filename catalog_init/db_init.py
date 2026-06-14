@@ -90,10 +90,10 @@ CREATE TABLE IF NOT EXISTS pizza_orders (
     items            JSONB,
     total_price      NUMERIC(10, 2),
     shift_name       VARCHAR(100) DEFAULT NULL,
-    status           VARCHAR(50)  NOT NULL DEFAULT 'pending'
-                         CHECK (status IN ('pending', 'in_oven', 'in delivery', 'done', 'cancelled')),
+    status           VARCHAR(50)  NOT NULL DEFAULT 'pending' 
+        CHECK (status IN ('pending', 'in_oven', 'in delivery', 'done', 'cancelled')),
     inventory_status VARCHAR(50)  NOT NULL DEFAULT 'pending'
-                         CHECK (inventory_status IN ('pending', 'deducted', 'blocked', 'error')),
+        CHECK (inventory_status IN ('pending', 'deducted', 'blocked', 'error')),
     inventory_note   TEXT,
     created_at       TIMESTAMPTZ    DEFAULT NOW()
 );
@@ -462,3 +462,18 @@ def init() -> None:
 
 if __name__ == "__main__":
     init()
+    
+# CREATE TABLE fiscal_transactions (
+#     id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+#     order_id            UUID NOT NULL REFERENCES pizza_orders(id),
+#     tse_transaction_id  TEXT,
+#     tse_serial_number   TEXT,
+#     signature           TEXT,
+#     signature_counter   BIGINT,
+#     timestamp_start     TIMESTAMPTZ,
+#     timestamp_end       TIMESTAMPTZ,
+#     raw_response        JSONB,
+#     status              VARCHAR(50)
+#         CHECK(status IN ('pending','completed','failed')),
+#     created_at          TIMESTAMPTZ DEFAULT NOW()
+# );

@@ -6,6 +6,7 @@ import { CartItem, Modifier } from "./Beta_Catalog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
+import { AddressAutocomplete } from "./Catalog/AutocompleteComponent";
 import { AlertComponent } from "./BricksComponent/AlertComponents/AlertComponent";
 import { DectructiveAlertComponent } from "./BricksComponent/AlertComponents/DesctructiveAlertComponent";
 
@@ -76,7 +77,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
   return (
     <div className="flex flex-col h-full rounded-2xl gap-3 p-6">
 
-      {/* Delivery type badge at top — always visible, not changeable */}
+      {/* Delivery type badge at top always visible, not changeable */}
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-black uppercase">Bag</h2>
         <span className="text-[10px] font-black uppercase tracking-widest bg-black text-white px-3 py-1.5 rounded-full">
@@ -138,7 +139,6 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
         </div>
 
         <div className="space-y-2">
-          {/* Only show address fields for Lieferservice */}
           {deliveryType === "Lieferservice" && (
             <div className="space-y-2">
               <Input
@@ -147,11 +147,10 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
                 onChange={e => setUserName(e.target.value)}
                 className="rounded-none border-zinc-200 h-10 text-xs font-bold uppercase"
               />
-              <Input
-                placeholder="SHIPPING ADDRESS"
+              <AddressAutocomplete
                 value={address}
-                onChange={e => setAddress(e.target.value)}
-                className="rounded-none border-zinc-200 h-10 text-xs font-bold uppercase"
+                onChange={setAddress}
+                placeholder="ADDRESS"
               />
             </div>
           )}

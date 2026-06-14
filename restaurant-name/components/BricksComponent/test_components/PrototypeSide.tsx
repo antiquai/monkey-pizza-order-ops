@@ -3,6 +3,7 @@
 import { ShoppingBag, LayoutDashboard, BarChart2, Bike, Clock, PowerOff, Store, Banknote, PiggyBank } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
+import Image from "next/image"
 
 const items = [
   { title: "Catalog",           value: "catalog",       icon: ShoppingBag     },
@@ -35,7 +36,7 @@ export function PrototypeSidebarComponent({ activeTab, onTabChange, shift, onClo
       onHoverStart={() => setOpen(true)}
       onHoverEnd={() => setOpen(false)}
       animate={{ width: open ? 220 : 64 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={{ duration: 0.35, ease:[0.22, 1, 0.36, 1] }}
       className="
         sticky top-3
         flex flex-col self-start shrink-0
@@ -47,22 +48,29 @@ export function PrototypeSidebarComponent({ activeTab, onTabChange, shift, onClo
       "
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 mb-6 px-1 h-9">
-        <span className="text-[26px] leading-none shrink-0 select-none">🐒</span>
-        <AnimatePresence>
-          {open && (
-            <motion.span
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              className="text-[14px] font-bold tracking-tight text-zinc-900 whitespace-nowrap"
-            >
-              Pizza Monkey
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </div>
+      <motion.div layout className="flex items-center mb-6 h-12">
+        {/* Graffik element */}
+        <motion.div layout className="shrink-0">
+          <Image src="/pizza_monkey.svg" alt="logo" width={42} height={42} />
+        </motion.div>
+        {/* Text element */}
+        <motion.div layout initial={false}
+          animate={{
+            width: open ? "auto" : 0,
+            opacity: open ? 1 : 0,
+            x: open ? 0 : -8,
+          }}
+          transition={{
+            duration: 0.28,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="overflow-hidden whitespace-nowrap"
+        >
+          <span className="ml-3 text-[20px] font-bold tracking-tight text-zinc-900">
+            Monkey Pizza
+          </span>
+        </motion.div>
+      </motion.div>
 
       {/* Nav */}
       <nav className="flex flex-col gap-1 flex-1">
@@ -73,8 +81,9 @@ export function PrototypeSidebarComponent({ activeTab, onTabChange, shift, onClo
               key={item.value}
               onClick={() => onTabChange(item.value)}
               className={`
-                relative flex items-center gap-3 px-2 py-2.5 rounded-xl
-                w-full text-left transition-colors duration-150
+                relative flex items-center py-2.5 rounded-xl
+                w-full text-left transition-all duration-300
+                ${open ? "gap-3 px-2 justify-start" : "justify-center px-0"}
                 ${isActive ? "bg-zinc-900 text-white" : "text-zinc-400 hover:bg-black/5 hover:text-zinc-800"}
               `}
             >
@@ -89,11 +98,9 @@ export function PrototypeSidebarComponent({ activeTab, onTabChange, shift, onClo
               <AnimatePresence>
                 {open && (
                   <motion.span
-                    initial={{ opacity: 0, x: -6 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -6 }}
-                    transition={{ duration: 0.15, ease: "easeOut" }}
-                    className="text-[13px] font-medium whitespace-nowrap"
+                    animate={{ opacity: open? 1 : 0, x: open ? 0 : -12}}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    className="text-[13px] font-medium overflow-hidden whitespace-nowrap"
                   >
                     {item.title}
                   </motion.span>
@@ -104,10 +111,9 @@ export function PrototypeSidebarComponent({ activeTab, onTabChange, shift, onClo
         })}
       </nav>
 
-      {/* Bottom — shift info + close button */}
       <div className="mt-4 pt-3 border-t border-zinc-100 flex flex-col gap-2">
 
-        {/* Shift name — only when expanded */}
+        {/* Shift name (if expended) */}
         <AnimatePresence>
           {open && shift && (
             <motion.div

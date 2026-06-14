@@ -13,6 +13,7 @@ import TimeTableComponent from "@/components/TimeTable/TimeTableComponent";
 import Storage from "@/components/StorageTracking/StorageComponent";
 import DeliveryComponent from "@/components/DeliveryDashborad/DeliveryComponent";
 import FinanceComponent from "@/components/FinanceDashboard/FinanceComponent";
+import Image from "next/image";
 
 const GATEWAY_URL = "http://192.168.2.32:8000"
 
@@ -87,10 +88,10 @@ export default function Home() {
     return (
       <div className="flex w-full h-screen bg-zinc-100 items-center justify-center">
         <div className="flex flex-col items-center gap-6">
-          <span className="text-7xl select-none">🐒</span>
+          <Image src="/pizza_monkey.svg" alt="logo" width={325} height={325}/>
           <h1 className="text-4xl font-black tracking-tighter uppercase">Pizza Monkey</h1>
           <p className="text-sm text-zinc-400 uppercase tracking-widest font-medium">
-            Kitchen Display System
+            Restaurant POS System
           </p>
           <button
             onClick={() => setScreen('admin_login')}
