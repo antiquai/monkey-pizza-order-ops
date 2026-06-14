@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CartItem, Modifier } from "./Beta_Catalog"; 
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
-import { AddressAutocomplete } from "./Catalog/AutocompleteComponent";
-import { AlertComponent } from "./BricksComponent/AlertComponents/AlertComponent";
-import { DectructiveAlertComponent } from "./BricksComponent/AlertComponents/DesctructiveAlertComponent";
+import { AddressAutocomplete } from "./AutocompleteComponent";
+import { AlertComponent } from "../BricksComponent/AlertComponents/AlertComponent";
+import { DectructiveAlertComponent } from "../BricksComponent/AlertComponents/DesctructiveAlertComponent";
 
 import { toast } from "sonner";
 

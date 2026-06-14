@@ -6,7 +6,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 
-import { Product } from "../../Beta_Catalog";
+import { Product } from "../../Catalog/Beta_Catalog";
 
 interface Props {
   product: Product;

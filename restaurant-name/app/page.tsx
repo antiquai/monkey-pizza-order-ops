@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 
 import { Order } from "@/components/WaiterDashboard/WaiterDashboard";
 
-import Catalog from "@/components/Beta_Catalog";
+import Catalog from "@/components/Catalog/Beta_Catalog";
 import WaiterDashboard from "@/components/WaiterDashboard/WaiterDashboard"
 import { PrototypeSidebarComponent } from "@/components/BricksComponent/test_components/PrototypeSide"
 

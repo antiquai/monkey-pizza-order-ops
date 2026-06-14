@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
 import { useEffect, useMemo, useState } from "react";
-import { Product, Modifier, ProductSize } from "../Beta_Catalog";
+import { Product, Modifier, ProductSize } from "../Catalog/Beta_Catalog";
 
 
 interface Props {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Input } from "./ui/input";
-import ModifierSelector from "./BricksComponent/Beta_ModifierSelector";
-import ProductCardComponent from "./BricksComponent/CardComponents/Beta_ProductCardComponent";
+import { Input } from "../ui/input";
+import ModifierSelector from "../BricksComponent/Beta_ModifierSelector";
+import ProductCardComponent from "../BricksComponent/CardComponents/Beta_ProductCardComponent";
 import PrimerCart from "./Beta_PrimerCartComponent";
 
 export interface Modifier {
