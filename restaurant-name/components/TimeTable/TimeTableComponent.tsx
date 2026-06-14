@@ -215,7 +215,7 @@ export default function TimeTableComponent() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -6, scale: 0.97 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute top-full mt-2 left-0 bg-white border border-zinc-100 rounded-2xl shadow-lg z-50 overflow-hidden min-w-[200px]"
+                      className="absolute top-full mt-2 left-0 bg-white border border-zinc-100 rounded-2xl shadow-lg z-50 overflow-hidden min-w-50"
                     >
                       {weeks.map(week => (
                         <button
@@ -272,7 +272,7 @@ export default function TimeTableComponent() {
             >
               <div className="flex items-end gap-3 bg-zinc-50 border border-zinc-200 rounded-2xl p-4 w-fit">
                 
-                {/* Shadcn Calendar for 'Week Start' */}
+                {/* Shadcn Calendar for Week Start*/}
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">From</label>
                   <Popover>
@@ -280,7 +280,7 @@ export default function TimeTableComponent() {
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-[160px] justify-start text-left font-medium text-sm rounded-xl border-zinc-200 bg-white h-10 outline-none hover:bg-white focus:border-black transition-all",
+                          "w-40 justify-start text-left font-medium text-sm rounded-xl border-zinc-200 bg-white h-10 outline-none hover:bg-white focus:border-black transition-all",
                           !weekStart && "text-muted-foreground"
                         )}
                       >
@@ -306,7 +306,7 @@ export default function TimeTableComponent() {
                       <Button
                         variant={"outline"}
                         className={cn(
-                          "w-[160px] justify-start text-left font-medium text-sm rounded-xl border-zinc-200 bg-white h-10 outline-none hover:bg-white focus:border-black transition-all",
+                          "w-40 justify-start text-left font-medium text-sm rounded-xl border-zinc-200 bg-white h-10 outline-none hover:bg-white focus:border-black transition-all",
                           !weekEnd && "text-muted-foreground"
                         )}
                       >

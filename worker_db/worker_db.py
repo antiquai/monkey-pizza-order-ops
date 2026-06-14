@@ -51,9 +51,9 @@ def database_operator(order_data):
     cursor.execute("""
         INSERT INTO pizza_orders (
             kitchen_id, customer, address, type_of_delivery,
-            items, total_price, shift_name, inventory_status
+            items, total_price, shift_name, shift_id, inventory_status
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending')
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending')
         RETURNING id
     """, (
         order_data.get("order_id"),
@@ -63,6 +63,7 @@ def database_operator(order_data):
         Json(order_data.get("items")),
         order_data.get("total_price"),
         order_data.get("shift_name"),
+        order_data.get("shift_id")
     ))
 
     db_order_id = cursor.fetchone()[0]

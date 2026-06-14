@@ -115,6 +115,9 @@ class Order(BaseModel):
     customer: Optional[str] = None
     address: Optional[str] = None
     type_of_delivery: str
+    is_preorder: bool
+    preorder_date: Optional[str] = None
+    preorder_time: Optional[str] = None
     items: list[Items]
     total_price: float
     
@@ -613,34 +616,48 @@ async def checkout(data: Order):
     conn = db_connect()
     cursor = conn.cursor()
     
-    cursor.execute("""SELECT name FROM shifts WHERE closed_at IS NULL LIMIT 1""")
+    cursor.execute("""SELECT id, name FROM shifts WHERE closed_at IS NULL LIMIT 1""")
     
     shift_row = cursor.fetchone()
-    
-    shift_name = shift_row[0] if shift_row else None
-    
+    shift_id = shift_row[0] if shift_row else None
+    shift_name = shift_row[1] if shift_row else None
+
+    if shift_id:
+        cursor.execute("""
+            SELECT COUNT(*) FROM pizza_orders WHERE shift_id = %s
+        """, (shift_id,))
+        count_row = cursor.fetchone()
+        kitchen_id = (count_row[0] + 1) if count_row else 1
+    else:
+        kitchen_id = 1
+
     cursor.close()
     conn.close()
     
-    order_id = r.incr("order_id")
-    
-    print(f'Order {order_id} received !', flush=True)
     
     # Refracting data into a dict
     clean_data = jsonable_encoder(data) 
     
-    # Addin data to the scoket room "kitchen"
-    await sio.emit("new_order_kitchen", {
-        "order_id": order_id,
-        **clean_data  
-    }, room='kitchen')
+    if not clean_data.get("is_preorder", False):
+        print(f'Order ORD-{kitchen_id} received !', flush=True)
+        # Addin data to the scoket room "kitchen"
+        await sio.emit("new_order_kitchen", {
+            "order_id": kitchen_id,
+            **clean_data  
+        }, room='kitchen')
 
-    # Adding into Redis queue for next proccessing by Worker
-    clean_data["order_id"] = f"order_{order_id}"
-    clean_data["shift_name"] = shift_name
-    r.lpush("handle_order", json.dumps(clean_data))
+        # Adding into Redis queue for next proccessing by Worker
+        clean_data["order_id"] = kitchen_id
+        clean_data["shift_name"] = shift_name
+        clean_data["shift_id"] = shift_id
+        
+        updated_dump = json.dumps(clean_data)
+        r.lpush("handle_order", updated_dump)
 
-    return {"status": "Order sent to kitchen !"}
+        return {"status": "Order sent to kitchen !"}
+    else:
+        print("Preorder was recived, would be managed by worker")
+        return {"Got an preorder, no logic yet"}
 
 # Changing status of order and sending to the packstation for next step (oven, packing, delivery etc.)
 @app.post("/order_in_oven")

@@ -5,6 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CartItem, Modifier } from "./Beta_Catalog"; 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { format, parseISO } from "date-fns"
+import { Calendar as CalendarIcon } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 import { AddressAutocomplete } from "./AutocompleteComponent";
 import { AlertComponent } from "../BricksComponent/AlertComponents/AlertComponent";
@@ -26,6 +33,9 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
   const [user_name, setUserName] = useState("");
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isPreorder, setIsPreorder] = useState(false)
+  const [date, setDate] = useState("")
+  const [time, setTiem] = useState("")
 
   const total = items.reduce((acc, item) => {
     const modsPrice = item.modifiers?.reduce((mAcc, m) => mAcc + (m.price * m.count), 0) || 0;
@@ -43,7 +53,10 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
     const orderData = {
       customer: user_name || " ",
       address: address || " ",
-      type_of_delivery: deliveryType,        
+      type_of_delivery: deliveryType,
+      is_preorder: isPreorder,
+      preorder_date: date || " ",
+      preorder_tiem: time || " ",        
       items: items.map(item => ({
         product_id: item.id,   
         name: item.name,
@@ -83,6 +96,46 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
         <span className="text-[10px] font-black uppercase tracking-widest bg-black text-white px-3 py-1.5 rounded-full">
           {deliveryType}
         </span>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {/* Switch and Label Row */}
+        <div className="flex items-center space-x-2">
+          <Switch 
+            id="preorder-mode" 
+            checked={isPreorder} 
+            onCheckedChange={setIsPreorder}
+          />
+          <Label htmlFor="preorder-mode">Preorder Mode</Label>
+        </div>
+
+        {/* Popover Calendar */}
+        <div className="flex flex-col gap-1">
+          <label className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">From</label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                disabled={!isPreorder} 
+                variant={"outline"}
+                className={cn(
+                  "w-40 justify-start text-left font-medium text-sm rounded-xl border-zinc-200 bg-white h-10 outline-none hover:bg-white focus:border-black transition-all",
+                  (!date || !isPreorder) && "text-muted-foreground opacity-50" 
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4 text-zinc-400" />
+                {date ? format(parseISO(date), "yyyy-MM-dd") : <span>Pick date</span>}
+              </Button>
+            </PopoverTrigger>
+              
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={date ? parseISO(date) : undefined}
+                onSelect={(selectedDay) => setDate(selectedDay ? format(selectedDay, "yyyy-MM-dd") : "")}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       <h3 className="text-[10px] tracking-[0.3em] text-zinc-400 uppercase font-medium">
