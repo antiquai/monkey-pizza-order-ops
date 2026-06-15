@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CartItem, Modifier } from "./Beta_Catalog"; 
 import { Button } from "../ui/button";
@@ -8,7 +8,7 @@ import { Input } from "../ui/input";
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { format, parseISO } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar as CalendarIcon, Clock, ChevronUp, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -27,6 +27,15 @@ interface Props {
   onOrderComplete: () => void;
 }
 
+// Helpers for clocks
+function snapMinutes(m: number): number {
+  return (Math.round(m / 5) * 5) % 60;
+}
+
+function padTwo(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
 const GATEWAY_URL = "http://192.168.2.32:8000";
 
 export default function PrimerCart({ items, onRemove, onClear, deliveryType, onOrderComplete }: Props) {
@@ -36,6 +45,41 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
   const [isPreorder, setIsPreorder] = useState(false)
   const [date, setDate] = useState("")
   const [time, setTiem] = useState("")
+
+  const now = new Date();
+  const [hour, setHour] = useState<number>(now.getHours());
+  const [minute, setMinute] = useState<number>(snapMinutes(now.getMinutes()));
+
+  useEffect(() => {
+    if (isPreorder) {
+      setTiem(`${padTwo(hour)}:${padTwo(minute)}`);
+    } else {
+      setTiem("");
+    }
+  }, [hour, minute, isPreorder]);
+
+  const handleHourChange = (delta: number) => {
+    setHour((prev) => (prev + delta + 24) % 24);
+  };
+
+  const handleMinuteChange = (delta: number) => {
+    setMinute((prev) => {
+      let next = prev + delta * 5;
+      if (next < 0) next = 55;
+      if (next >= 60) next = 0;
+      return snapMinutes(next);
+    });
+  };
+
+  const handleWheelHour = (e: React.WheelEvent) => {
+    e.preventDefault();
+    handleHourChange(e.deltaY > 0 ? -1 : 1);
+  };
+
+  const handleWheelMinute = (e: React.WheelEvent) => {
+    e.preventDefault();
+    handleMinuteChange(e.deltaY > 0 ? -1 : 1);
+  };
 
   const total = items.reduce((acc, item) => {
     const modsPrice = item.modifiers?.reduce((mAcc, m) => mAcc + (m.price * m.count), 0) || 0;
@@ -56,7 +100,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
       type_of_delivery: deliveryType,
       is_preorder: isPreorder,
       preorder_date: date || " ",
-      preorder_tiem: time || " ",        
+      preorder_time: time || " ",        
       items: items.map(item => ({
         product_id: item.id,   
         name: item.name,
@@ -78,7 +122,10 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
         toast.custom(() => <div className="w-full flex justify-center"><AlertComponent /></div>);
         setAddress("");
         setUserName("");
-        onOrderComplete();                    
+        setDate("");
+        setHour(now.getHours());
+        setMinute(snapMinutes(now.getMinutes()));
+        onOrderComplete();                  
       }
     } catch (error) {
       toast.custom(() => <div className="w-full flex justify-center"><DectructiveAlertComponent /></div>);
@@ -109,7 +156,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
           <Label htmlFor="preorder-mode">Preorder Mode</Label>
         </div>
 
-        {/* Popover Calendar */}
+        {/* Popover Calendar with Integrated Clock */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">From</label>
           <Popover>
@@ -118,21 +165,80 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
                 disabled={!isPreorder} 
                 variant={"outline"}
                 className={cn(
-                  "w-40 justify-start text-left font-medium text-sm rounded-xl border-zinc-200 bg-white h-10 outline-none hover:bg-white focus:border-black transition-all",
+                  "w-56 justify-start text-left font-medium text-sm rounded-xl border-zinc-200 bg-white h-10 outline-none hover:bg-white focus:border-black transition-all",
                   (!date || !isPreorder) && "text-muted-foreground opacity-50" 
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4 text-zinc-400" />
-                {date ? format(parseISO(date), "yyyy-MM-dd") : <span>Pick date</span>}
+                {/* Dynamically shows both Date and Clock choice in button title */}
+                {date ? `${format(parseISO(date), "yyyy-MM-dd")} · ${time}` : <span>Pick date & time</span>}
               </Button>
             </PopoverTrigger>
               
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={date ? parseISO(date) : undefined}
-                onSelect={(selectedDay) => setDate(selectedDay ? format(selectedDay, "yyyy-MM-dd") : "")}
-              />
+            <PopoverContent className="w-auto p-0 rounded-xl border-zinc-200 shadow-xl" align="start">
+              <div className="flex">
+                {/* Left Side: Your Original Shadcn Calendar */}
+                <Calendar
+                  mode="single"
+                  selected={date ? parseISO(date) : undefined}
+                  onSelect={(selectedDay) => setDate(selectedDay ? format(selectedDay, "yyyy-MM-dd") : "")}
+                  disabled={{ before: new Date() }}
+                />
+
+                {/* Right Side: Extracted Custom Clock Drums */}
+                <div className="flex flex-col justify-center items-center border-l border-zinc-100 px-4 gap-3 min-w-[90px]">
+                  <div className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
+                    <Clock className="h-3 w-3" />
+                    Time
+                  </div>
+
+                  {/* Hour Drum */}
+                  <div
+                    className="flex flex-col items-center gap-1 select-none"
+                    onWheel={handleWheelHour}
+                  >
+                    <button
+                      onClick={() => handleHourChange(1)}
+                      className="text-zinc-300 hover:text-black transition-colors"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </button>
+                    <span className="text-xl font-black tabular-nums w-8 text-center">
+                      {padTwo(hour)}
+                    </span>
+                    <button
+                      onClick={() => handleHourChange(-1)}
+                      className="text-zinc-300 hover:text-black transition-colors"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <span className="text-zinc-300 font-black text-lg">:</span>
+
+                  {/* Minute Drum */}
+                  <div
+                    className="flex flex-col items-center gap-1 select-none"
+                    onWheel={handleWheelMinute}
+                  >
+                    <button
+                      onClick={() => handleMinuteChange(1)}
+                      className="text-zinc-300 hover:text-black transition-colors"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </button>
+                    <span className="text-xl font-black tabular-nums w-8 text-center">
+                      {padTwo(minute)}
+                    </span>
+                    <button
+                      onClick={() => handleMinuteChange(-1)}
+                      className="text-zinc-300 hover:text-black transition-colors"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </PopoverContent>
           </Popover>
         </div>

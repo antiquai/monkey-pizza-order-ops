@@ -92,8 +92,8 @@ CREATE TABLE IF NOT EXISTS pizza_orders (
     shift_name       VARCHAR(100) DEFAULT NULL,
     shift_id         INT REFERENCES shifts(id) DEFAULT NULL,
     is_preorder      BOOLEAN NOT NULL DEFAULT FALSE,
-    preorder_date    DATE,
-    preorder_time    TIME,
+    preorder_date    VARCHAR(20),
+    preorder_time    VARCHAR(20),
     status           VARCHAR(50)  NOT NULL DEFAULT 'pending' 
         CHECK (status IN ('pending', 'in_oven', 'awaiting for delivery', 'in delivery', 'done', 'cancelled')),
     inventory_status VARCHAR(50)  NOT NULL DEFAULT 'pending'

@@ -45,9 +45,9 @@ def db_connect():
 
 def get_shift_name() -> str:
     hour = datetime.now().hour
-    if 6 <= hour < 14:
+    if 6 <= hour < 16:
         return f"{datetime.now().date()}_morning"
-    elif 14 <= hour < 22:
+    elif 16 <= hour < 23:
         return f"{datetime.now().date()}_afternoon"
     else:
         return f"{datetime.now().date()}_evening"
@@ -61,6 +61,25 @@ def get_shift_from_db() -> str:
     conn.close()
     return row[0] if row else None
 
+def calculate_target_shift_name(target_date_str: str, target_time_str: str) -> str:
+    if not target_time_str:
+        suffix = "morning"  
+    elif isinstance(target_time_str, str):
+        suffix_parts = target_time_str.split(":")
+        t_hour = int(suffix_parts[0]) if suffix_parts and suffix_parts[0].isdigit() else 12
+    
+    else:
+        t_hour = getattr(target_time_str, 'hour', 12)
+
+    # Calculate shift string suffix
+    if 6 <= t_hour < 16:
+        suffix = "morning"
+    elif 16 <= t_hour < 23:
+        suffix = "afternoon"
+    else:
+        suffix = "evening"
+        
+    return f"{target_date_str}_{suffix}"
 
 # Supply model
 class Supply(BaseModel):
@@ -619,45 +638,76 @@ async def checkout(data: Order):
     cursor.execute("""SELECT id, name FROM shifts WHERE closed_at IS NULL LIMIT 1""")
     
     shift_row = cursor.fetchone()
-    shift_id = shift_row[0] if shift_row else None
-    shift_name = shift_row[1] if shift_row else None
+    current_shift_id = shift_row[0] if shift_row else None
+    current_shift_name = shift_row[1] if shift_row else None
 
-    if shift_id:
-        cursor.execute("""
-            SELECT COUNT(*) FROM pizza_orders WHERE shift_id = %s
-        """, (shift_id,))
-        count_row = cursor.fetchone()
-        kitchen_id = (count_row[0] + 1) if count_row else 1
-    else:
-        kitchen_id = 1
-
-    cursor.close()
-    conn.close()
-    
-    
     # Refracting data into a dict
     clean_data = jsonable_encoder(data) 
+    is_preorder = clean_data.get("is_preorder", False)
     
-    if not clean_data.get("is_preorder", False):
-        print(f'Order ORD-{kitchen_id} received !', flush=True)
-        # Addin data to the scoket room "kitchen"
-        await sio.emit("new_order_kitchen", {
-            "order_id": kitchen_id,
-            **clean_data  
-        }, room='kitchen')
+    print(clean_data, flush=True)
 
-        # Adding into Redis queue for next proccessing by Worker
+    if not is_preorder:
+        if current_shift_id:
+            cursor.execute("SELECT COUNT(*) FROM pizza_orders WHERE shift_id = %s", (current_shift_id,))
+            kitchen_id = (cursor.fetchone()[0] + 1)
+        else:
+            kitchen_id = 1
+            
         clean_data["order_id"] = kitchen_id
-        clean_data["shift_name"] = shift_name
-        clean_data["shift_id"] = shift_id
+        clean_data["shift_name"] = current_shift_name
+        clean_data["shift_id"] = current_shift_id
+    
+        cursor.close()
+        conn.close()
         
-        updated_dump = json.dumps(clean_data)
-        r.lpush("handle_order", updated_dump)
-
+        await sio.emit("new_order_kitchen", {"order_id": kitchen_id, **clean_data}, room='kitchen')
+        r.lpush("handle_order", json.dumps(clean_data))
         return {"status": "Order sent to kitchen !"}
+    
     else:
-        print("Preorder was recived, would be managed by worker")
-        return {"Got an preorder, no logic yet"}
+        p_date = clean_data.get("preorder_date")
+        p_time = clean_data.get("preorder_time")
+        
+        
+        if p_time and len(p_time.split(":")) == 2:
+            p_time = f"{p_time}:00"
+            clean_data["preorder_time"] = p_time
+        
+        target_shift_name = calculate_target_shift_name(p_date, p_time)
+        today_str = str(datetime.now().date)
+        
+        if p_date == today_str and target_shift_name == current_shift_name:
+            # Fot today, but later(inside of active shift)
+            cursor.execute("SELECT COUNT(*) FROM pizza_orders WHERE shift_id = %s", (current_shift_id,))
+            kitchen_id = (cursor.fetchone()[0] + 1)
+            
+            clean_data["order_id"] = kitchen_id
+            clean_data["shift_name"] = current_shift_name
+            clean_data["shift_id"] = current_shift_id
+            
+            cursor.close()
+            conn.close()
+
+            # Broadcast immediately to live screen
+            await sio.emit("new_order_kitchen", {"order_id": kitchen_id, **clean_data}, room='kitchen')
+            r.lpush("handle_order", json.dumps(clean_data))
+            return {"status": "Preorder assigned directly to active shift!"}
+        
+        else:
+            # For another shift (1 today, but next comming shift | 2 for next days)
+            cursor.execute("SELECT COUNT(*) FROM pizza_orders WHERE shift_name = %s", (target_shift_name,))
+            future_kitchen_id = cursor.fetchone()[0] + 1
+            
+            clean_data["order_id"] = future_kitchen_id
+            clean_data["shift_name"] = target_shift_name
+            clean_data["shift_id"] = None
+            
+            cursor.close()
+            conn.close()
+            
+            r.lpush("handle_order", json.dumps(clean_data))
+            return {"status": f"Preorder logged safely for future shift: {target_shift_name}"}
 
 # Changing status of order and sending to the packstation for next step (oven, packing, delivery etc.)
 @app.post("/order_in_oven")
@@ -706,7 +756,3 @@ async def cancel_order(data: Status):
 
 
 app.mount("/socket.io", sio_app)
-
-
-
-

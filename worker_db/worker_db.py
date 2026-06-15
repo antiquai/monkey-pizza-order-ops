@@ -51,9 +51,9 @@ def database_operator(order_data):
     cursor.execute("""
         INSERT INTO pizza_orders (
             kitchen_id, customer, address, type_of_delivery,
-            items, total_price, shift_name, shift_id, inventory_status
+            items, total_price, shift_name, shift_id, is_preorder, preorder_date, preorder_time, inventory_status
         )
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'pending')
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'pending')
         RETURNING id
     """, (
         order_data.get("order_id"),
@@ -63,7 +63,10 @@ def database_operator(order_data):
         Json(order_data.get("items")),
         order_data.get("total_price"),
         order_data.get("shift_name"),
-        order_data.get("shift_id")
+        order_data.get("shift_id"),
+        order_data.get("is_preorder", False),
+        order_data.get("preorder_date"),
+        order_data.get("preorder_time")
     ))
 
     db_order_id = cursor.fetchone()[0]
@@ -116,7 +119,11 @@ def build_required_ingredients(cur, order_items):
 
         # Modifiers / extras
         for mod in modifiers:
-            mod_count = int(mod.get("count", 1) or 1)
+            mod_count = mod.get("count")
+            if mod_count is None:
+                mod_count = mod.get("q", 1)
+             
+            mod_count = int(mod_count or 1)    
             if mod_count <= 0:
                 continue
 
@@ -206,6 +213,10 @@ while True:
         # save order to pizza_orders
         db_order_id = database_operator(order)
 
+        # checking preorder flag
+        is_preorder = order.get("is_preorder", False)
+        shift_id = order.get("shift_id")
+        
         # calculate inventory needs
         conn = db_connect()
         cur = conn.cursor()
@@ -231,10 +242,15 @@ while True:
                 )
                 print(f"Inventory blocked for order {db_order_id}: {missing}", flush=True)
             else:
-                apply_inventory_deduction(cur, required_totals, db_order_id)
-                conn.commit()
-                set_order_inventory_status(db_order_id, "deducted", note="inventory deducted successfully")
-                print(f"Inventory deducted for order {db_order_id}", flush=True)
+                if is_preorder and shift_id is None:
+                    conn.commit()
+                    set_order_inventory_status(db_order_id, "pending", note="Preorder logged. Stock calculation delayed.") 
+                    print(f"Preorder {db_order_id} recorded safely. Inventory on-hold.", flush=True)   
+                else: 
+                    apply_inventory_deduction(cur, required_totals, db_order_id)
+                    conn.commit()
+                    set_order_inventory_status(db_order_id, "deducted", note="inventory deducted successfully")
+                    print(f"Inventory deducted for order {db_order_id}", flush=True)
 
         except Exception as inventory_error:
             conn.rollback()
