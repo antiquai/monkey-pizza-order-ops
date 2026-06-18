@@ -169,11 +169,40 @@ def open_shift():
     shift_name = get_shift_name()
     cursor.execute("""INSERT INTO shifts (name, opened_at) VALUES (%s, CURRENT_TIMESTAMP) RETURNING id, name, opened_at""", (shift_name,))
     row = cursor.fetchone() 
+    new_shift_id = row[0]
+    new_shift_name = row[1]
+    new_shift_opened_at = row[2]
+    conn.commit()
+
+    cursor.execute("""
+        SELECT id, items
+        FROM pizza_orders
+        WHERE shift_name = %s AND is_preorder = TRUE AND shift_id IS NULL
+    """, (new_shift_name,))
+    pending_preorders = cursor.fetchall()
+
+    activated_count = 0
+    for db_order_id, items in pending_preorders:
+        cursor.execute("""
+            UPDATE pizza_orders SET shift_id = %s WHERE id = %s
+        """, (new_shift_id, db_order_id))
+
+        r.lpush("preorder_deduct", json.dumps({
+            "db_order_id": str(db_order_id),
+            "items": items,
+        }))
+        activated_count += 1
+
     conn.commit()
     cursor.close()
     conn.close()
     
-    return {"id": row[0], "name": row[1], "opened_at": row[2].isoformat()}
+    return {
+        "id": new_shift_id,
+        "name": new_shift_name,
+        "opened_at": new_shift_opened_at.isoformat(),
+        "preorders_activated": activated_count,
+    }
 
 # CLOSE SHIFT
 @app.post("/shift/close")
@@ -320,7 +349,7 @@ async def get_orders():
     conn = db_connect()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT kitchen_id, customer, address, type_of_delivery, items, total_price, status
+        SELECT kitchen_id, customer, address, type_of_delivery, items, total_price, status, is_preorder, preorder_date, preorder_time
         FROM pizza_orders WHERE shift_name = %s 
         ORDER BY created_at DESC
         LIMIT 200
@@ -343,6 +372,9 @@ async def get_orders():
                 "items": row[4],       
                 "total_price": row[5],
                 "status": row[6],
+                "is_preorders": row[7],
+                "preorder_date": row[8],
+                "preorder_time": row[9]
             })
     else:
         print("No orders found in the database.")
@@ -351,12 +383,12 @@ async def get_orders():
 
 # Fetch all orders from database for kit / pack
 @app.get("/get_orders/kitchen")
-async def get_orders():
+async def get_orders_kitchen():
     shift = get_shift_name()
     conn = db_connect()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT kitchen_id, customer, address, type_of_delivery, items, total_price, status
+        SELECT kitchen_id, customer, address, type_of_delivery, items, total_price, status, is_preorder, preorder_date, preorder_time
         FROM pizza_orders WHERE shift_name = %s AND status IN ('pending', 'in_oven', 'packed')
         ORDER BY created_at DESC
         LIMIT 200
@@ -379,6 +411,9 @@ async def get_orders():
                 "items": row[4],       
                 "total_price": row[5],
                 "status": row[6],
+                "is_preorders": row[7],
+                "preorder_date": row[8],
+                "preorder_time": row[9]
             })
     else:
         print("No orders found in the database.")

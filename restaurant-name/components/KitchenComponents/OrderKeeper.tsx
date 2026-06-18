@@ -16,21 +16,24 @@ export interface OrderModifier {
 }
 
 export interface OrderItem {
-    name: string;
-    q: number;
-    base_price: number;
-    modifiers?: OrderModifier[];
-    size?: string | null;
+  name: string;
+  q: number;
+  base_price: number;
+  modifiers?: OrderModifier[];
+  size?: string | null;
 }
 
 export interface Order {
-    order_id : number;
-    customer: string;
-    address: string; 
-    type_of_delivery: string;
-    items: OrderItem[];
-    total_price: number;
-    status?: string;
+  order_id : number;
+  customer: string;
+  address: string;
+  type_of_delivery: string;
+  items: OrderItem[];
+  total_price: number;
+  status?: string;
+  is_preorder?: boolean;
+  preorder_date?: string | null;
+  preorder_time?: string | null;
 }
 
 const SOCKET_URL = "http://192.168.2.32:8000";

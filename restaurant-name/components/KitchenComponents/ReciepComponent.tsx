@@ -38,6 +38,11 @@ export default function ProductCard({ order, onDone, onCancel }: ReceiptProps) {
       {/* Header of Receipt */}
       <div className="flex justify-between items-center bg-zinc-100 border-b border-zinc-200 px-4 py-3 ">
         <h2 className="text-sm font-bold uppercase tracking-wide">ORD-{order.order_id}</h2>
+        {order.is_preorder && (
+          <span className="text-[10px] font-bold uppercase bg-amber-200 text-amber-900 px-2 py-1 rounded-md tracking-wide">
+            {order.preorder_date} · {order.preorder_time}
+          </span>
+        )}
       </div>
       {/* Items List */}
       <div className="px-4 pt-4 pb-2">
