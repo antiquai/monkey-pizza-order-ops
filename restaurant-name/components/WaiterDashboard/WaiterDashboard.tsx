@@ -37,7 +37,7 @@ export interface Order {
   preorder_time?: string | null;
 }
 
-const  GATEWAY_URL = "http://192.168.2.32:8000";
+const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
 export default function WaiterDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -83,7 +83,7 @@ export default function WaiterDashboard() {
   }, []);
 
   const activeOrders    = orders.filter(o => o.status === "pending" || o.status === "in_oven");
-  const deliveryOrders  = orders.filter(o => o.status === "in delivery");
+  const deliveryOrders  = orders.filter(o => o.status === "awaiting_for_delivery");
   const archivedOrders  = orders.filter(o => o.status === "done");
   const cancelledOrders = orders.filter(o => o.status === "cancelled");
   const preorders        = orders.filter(o => o.is_preorder).sort((a, b) => {
@@ -94,7 +94,7 @@ export default function WaiterDashboard() {
   });
 
   if (loading) {
-    return (
+    return (  
       <div className="flex items-center justify-center w-full h-screen">
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-4 border-black border-t-transparent rounded-full animate-spin" />

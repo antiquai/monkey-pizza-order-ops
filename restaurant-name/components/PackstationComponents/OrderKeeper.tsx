@@ -35,8 +35,9 @@ export interface Order {
   preorder_time?: string | null;
 }
 
-const SOCKET_URL = "http://192.168.2.32:8000";
-const GATEWAY_URL = "http://192.168.2.32:8000";
+const SOCKET_URL = process.env.NEXT_PUBLIC_SERVER_IP
+const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
+
 let socket: Socket;
 
 export default function OrderKeeper() {

@@ -16,7 +16,7 @@ interface Props {
     onConfirm: (selectedModifiers: Modifier[], selectedSize?: ProductSize) => void;
 }
 
-const GATEWAY_URL = "http://192.168.2.32:8000";
+const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
 export default function ModifierSelector({ product, isOpen, onClose, onConfirm }: Props) {
     const [allModifiers, setAllModifiers] = useState<Modifier[]>([]);

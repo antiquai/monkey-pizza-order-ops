@@ -36,7 +36,7 @@ function padTwo(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-const GATEWAY_URL = "http://192.168.2.32:8000";
+const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
 export default function PrimerCart({ items, onRemove, onClear, deliveryType, onOrderComplete }: Props) {
   const [user_name, setUserName] = useState("");

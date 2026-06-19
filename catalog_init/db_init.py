@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS pizza_orders (
     preorder_date    VARCHAR(20),
     preorder_time    VARCHAR(20),
     status           VARCHAR(50)  NOT NULL DEFAULT 'pending' 
-        CHECK (status IN ('pending', 'in_oven', 'awaiting for delivery', 'in delivery', 'done', 'cancelled')),
+        CHECK (status IN ('pending', 'in_oven', 'awaiting_for_delivery', 'in_delivery', 'done', 'cancelled')),
     inventory_status VARCHAR(50)  NOT NULL DEFAULT 'pending'
         CHECK (inventory_status IN ('pending', 'deducted', 'blocked', 'error')),
     inventory_note   TEXT,

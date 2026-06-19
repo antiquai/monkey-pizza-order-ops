@@ -27,9 +27,7 @@ def database_updater_non_delivery(order_id, shift):
     conn = db_connect()
     cursor = conn.cursor()
     
-    formated = f'order_{order_id}'
-    
-    cursor.execute("UPDATE pizza_orders SET status = 'done' WHERE kitchen_id = %s AND shift_name = %s", (formated, shift,))
+    cursor.execute("UPDATE pizza_orders SET status = 'done' WHERE kitchen_id = %s AND shift_name = %s", (str(order_id), shift,))
     
     conn.commit()
     cursor.close()
@@ -41,9 +39,7 @@ def database_updater_delivery(order_id, shift):
     conn = db_connect()
     cursor = conn.cursor()
     
-    formated = f'order_{order_id}'
-    
-    cursor.execute("UPDATE pizza_orders SET status = 'in delivery' WHERE kitchen_id = %s AND shift_name = %s", (formated, shift,))
+    cursor.execute("UPDATE pizza_orders SET status = 'awaiting_for_delivery' WHERE kitchen_id = %s AND shift_name = %s", (str(order_id), shift,))
     
     conn.commit()
     cursor.close()
@@ -55,9 +51,7 @@ def cancel_order(order_id, shift):
     conn = db_connect()
     cursor = conn.cursor()
     
-    formated = f'order_{order_id}'
-    
-    cursor.execute("UPDATE pizza_orders SET status = 'cancelled' WHERE kitchen_id = %s AND shift_name = %s", (formated, shift,))
+    cursor.execute("UPDATE pizza_orders SET status = 'cancelled' WHERE kitchen_id = %s AND shift_name = %s", (str(order_id), shift,))
     
     conn.commit()
     cursor.close()

@@ -16,7 +16,7 @@ interface Props {
   placeholder?: string;
 }
 
-const GATEWAY_URL = "http://192.168.2.32:8000";
+const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
 export function AddressAutocomplete({ value, onChange, placeholder }: Props) {
   const [query, setQuery] = useState(value);

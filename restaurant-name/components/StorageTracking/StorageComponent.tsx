@@ -14,7 +14,7 @@ export interface StorageItem {
     updated_at: string;
 }
 
-const GATEWAY_URL = "http://192.168.2.32:8000";
+const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
 export default function Storage() {
 
