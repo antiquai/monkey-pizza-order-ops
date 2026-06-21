@@ -63,6 +63,23 @@ services:
     deploy:
       replicas: 1
 
+  worker-preorder:
+    build: ./worker_preorder
+    volumes:
+      - ./worker_preorder:/app
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REDIS_HOST=redis
+      - DB_HOST=db
+    depends_on:
+      - redis
+      - db
+    networks:
+      - pizza_network
+    deploy:
+      replicas: 1
+
   worker-printer:
     build: ./worker_printer
     volumes:
@@ -97,7 +114,7 @@ services:
     deploy:
       replicas: 1
 
-  catalog_init:
+  db_init:
     build: ./catalog_init
     container_name: restaurant_catalog_init
     volumes:

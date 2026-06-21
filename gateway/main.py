@@ -17,6 +17,7 @@ from socket_manager import sio, sio_app
 import psycopg2
 
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # TODO: Make shift/close close all the sockets
 
@@ -44,13 +45,17 @@ def db_connect():
     )
 
 def get_shift_name() -> str:
-    hour = datetime.now().hour
+    germany_tz = ZoneInfo("Europe/Berlin")
+    germany = datetime.now(germany_tz)
+    
+    hour = germany.hour
+    currennt_date = germany.date()
     if 6 <= hour < 16:
-        return f"{datetime.now().date()}_morning"
+        return f"{currennt_date}_morning"
     elif 16 <= hour < 23:
-        return f"{datetime.now().date()}_afternoon"
+        return f"{currennt_date}_afternoon"
     else:
-        return f"{datetime.now().date()}_evening"
+        return f"{currennt_date}_evening"
 
 def get_shift_from_db() -> str:
     conn = db_connect()
@@ -372,7 +377,7 @@ async def get_orders():
                 "items": row[4],       
                 "total_price": row[5],
                 "status": row[6],
-                "is_preorders": row[7],
+                "is_preorder": row[7],
                 "preorder_date": row[8],
                 "preorder_time": row[9]
             })
@@ -411,7 +416,7 @@ async def get_orders_kitchen():
                 "items": row[4],       
                 "total_price": row[5],
                 "status": row[6],
-                "is_preorders": row[7],
+                "is_preorder": row[7],
                 "preorder_date": row[8],
                 "preorder_time": row[9]
             })
@@ -710,7 +715,7 @@ async def checkout(data: Order):
             clean_data["preorder_time"] = p_time
         
         target_shift_name = calculate_target_shift_name(p_date, p_time)
-        today_str = str(datetime.now().date)
+        today_str = str(datetime.now().date())
         
         if p_date == today_str and target_shift_name == current_shift_name:
             # Fot today, but later(inside of active shift)
