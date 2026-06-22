@@ -7,8 +7,8 @@ import { Toaster } from "sonner";
 
 const manrope = Manrope({subsets:['latin'],variable:'--font-sans'});
 
-const Chillax = localFont({
-  src: '../public/fonts/Chillax_Complete/Fonts/TTF/Chillax-Variable.ttf', 
+const Satoshi = localFont({
+  src: '../public/fonts/Satoshi_Complete/Satoshi_Complete/Fonts/TTF/Satoshi-Variable.ttf', 
   variable: '--font-custom',
 });
 
@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", Chillax.className , manrope.variable)}
+      className={cn("h-full", "antialiased", Satoshi.className , manrope.variable)}
     >
       <body className="min-h-full flex flex-col">
         {children}

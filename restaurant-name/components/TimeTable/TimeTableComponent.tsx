@@ -15,6 +15,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
+import { CalendarDays } from 'lucide-react';
+
 const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
 export interface StaffMember {
@@ -402,7 +404,7 @@ export default function TimeTableComponent() {
         {/* Empty state */}
         {weeks.length === 0 && !showCreateForm && (
           <div className="flex flex-col items-center justify-center py-32 gap-3">
-            <p className="text-zinc-300 text-4xl">📅</p>
+            <p className="text-zinc-300 text-4xl"><CalendarDays /></p>
             <p className="text-zinc-400 text-sm font-medium uppercase tracking-widest">No timetables yet</p>
             <button
               onClick={() => setShowCreateForm(true)}

@@ -160,6 +160,9 @@ class CustomerCreate(BaseModel):
     name: str
     phone: Optional[str] = None
     address: Optional[str] = None
+    
+class CustomerID(BaseModel):
+    cus_id: str
 
 # Basic route to check if API and Socket are running
 @app.get("/")
@@ -430,11 +433,26 @@ async def get_orders_kitchen():
                 "preorder_time": row[9]
             })
     else:
-        print("No orders found in the database.")
+        print("No orders found in the database.", flush=True)
         
     return orders
 
 # Customers
+@app.post("/customers")
+def create_customer(data: CustomerCreate):
+    conn = db_connect()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO customers (name, phone, address)
+        VALUES (%s, %s, %s)
+        RETURNING id
+    """, (data.name, data.phone, data.address))
+    new_id = cur.fetchone()[0]
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"id": str(new_id), "name": data.name, "phone": data.phone, "address": data.address}
+
 @app.get("/customers/search")
 def search_customers(q: str):
     if len(q.strip()) < 2:
@@ -457,21 +475,47 @@ def search_customers(q: str):
         {"id": str(r[0]), "name": r[1], "phone": r[2], "address": r[3]}
         for r in rows
     ]
-
-@app.post("/customers")
-def create_customer(data: CustomerCreate):
+    
+@app.get("/customers/load")
+def load_customers():
     conn = db_connect()
     cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO customers (name, phone, address)
-        VALUES (%s, %s, %s)
-        RETURNING id
-    """, (data.name, data.phone, data.address))
-    new_id = cur.fetchone()[0]
+    
+    cur.execute("""SELECT id, name, phone, address FROM customers""")
+    rows = cur.fetchall()
+    
+    cur.close()
+    conn.close()
+    
+    cus_data = []
+    if rows != None:
+       for row in rows:
+           cus_data.append({
+               "cus_id": row[0],
+               "cus_name": row[1],
+               "cus_phone": row[2],
+               "cus_address": row[3]
+           })
+    else:
+        print("No customers found in database", flush=True)
+    
+    return cus_data
+
+@app.post("/customers/delete")
+def delete_customer(data: CustomerID):
+    cus_id = data.cus_id
+    
+    conn = db_connect()
+    cur = conn.cursor()
+    
+    cur.execute("""DELETE FROM customers WHERE id = %s""", (cus_id,))
+    
     conn.commit()
     cur.close()
     conn.close()
-    return {"id": str(new_id), "name": data.name, "phone": data.phone, "address": data.address}
+    
+    
+    return {"status": f"Customer was successfully deleted from database: {cus_id}"}
 
 # Analytics routes
 @app.get("/admin_dashboard/analytics")
@@ -714,7 +758,7 @@ def get_timetable_weeks():
     cur.close(); conn.close()
     return [{"id": r[0], "week_start": str(r[1]), "week_end": str(r[2])} for r in rows]
 
-# TODO: Implement upload timetable into supabase, cloud storing for staff app (Teble in Supa already setted up)
+# TODO: Implement upload timetable into supabase, cloud storing for staff app (Table in Supa already setted up)
 @app.post("/timetable/upload")
 def upload_timetable():
     # Implementation for uploading timetable

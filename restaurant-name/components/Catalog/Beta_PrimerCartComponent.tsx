@@ -225,7 +225,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
                 />
 
                 {/* Right Side: Extracted Custom Clock Drums */}
-                <div className="flex flex-col justify-center items-center border-l border-zinc-100 px-4 gap-3 min-w-[90px]">
+                <div className="flex flex-col justify-center items-center border-l border-zinc-100 px-4 gap-3 min-w-22.5">
                   <div className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
                     <Clock className="h-3 w-3" />
                     Time

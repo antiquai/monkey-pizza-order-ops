@@ -1,6 +1,6 @@
 'use client'
 
-import { ShoppingBag, LayoutDashboard, BarChart2, Bike, Clock, PowerOff, Store, CircleDollarSign, UsersRound, Contact } from "lucide-react"
+import { ShoppingBag, LayoutDashboard, BarChart2, Bike, Clock, PowerOff, Warehouse, CircleDollarSign, UsersRound, Contact } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
 import Image from "next/image"
@@ -10,7 +10,7 @@ const items = [
   { title: "Dashboard",         value: "dashboard",     icon: LayoutDashboard },
   { title: "Delivery",          value: "delivery",      icon: Bike            },
   { title: "Customers",         value: "customers",     icon: Contact         },
-  { title: "Storage",           value: "storage",       icon: Store           },
+  { title: "Storage",           value: "storage",       icon: Warehouse       },
   { title: "Analytics",         value: "analytics",     icon: BarChart2       },
   { title: "Finance",           value: "finance",       icon: CircleDollarSign},
   { title: "Employees",         value: "employees",     icon: UsersRound      },
@@ -46,7 +46,7 @@ export function PrototypeSidebarComponent({ activeTab, onTabChange, shift, onClo
         bg-white/60 backdrop-blur-xl
         border border-white/80
         shadow-[0_8px_32px_rgba(0,0,0,0.08)]
-        z-50
+        z-50 h-[97vh]
       "
     >
       {/* Logo */}
