@@ -15,6 +15,8 @@ import DeliveryComponent from "@/components/DeliveryDashborad/DeliveryComponent"
 import FinanceComponent from "@/components/FinanceDashboard/FinanceComponent";
 
 import { useRouter } from "next/navigation"
+import CustomersDash from "@/components/Customers/CustomersDash";
+import EmployeesDash from "@/components/Employees/EmployeesDash";
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
@@ -112,11 +114,13 @@ export default function Home() {
       <main className="flex-1 min-w-0 ">
         {activeTab === 'catalog'    && <Catalog />}
         {activeTab === 'dashboard'  && <WaiterDashboard />}
-        {activeTab === 'analytics'  && <AdminDashboard />}
-        {activeTab === 'storage'    && <Storage />}
         {activeTab === 'delivery'   && <DeliveryComponent />}
-        {activeTab === 'time'       && <TimeTableComponent />}
+        {activeTab === 'customers'  && <CustomersDash />}
+        {activeTab === 'storage'    && <Storage />}
+        {activeTab === 'analytics'  && <AdminDashboard />}
         {activeTab === 'finance'    && <FinanceComponent />}
+        {activeTab === 'employees'  && <EmployeesDash/>}
+        {activeTab === 'time'       && <TimeTableComponent />}
       </main>
     </div>
   );

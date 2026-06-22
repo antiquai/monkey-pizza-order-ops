@@ -115,10 +115,10 @@ services:
       replicas: 1
 
   db_init:
-    build: ./catalog_init
+    build: ./db_init
     container_name: restaurant_catalog_init
     volumes:
-      - ./catalog_init:/app
+      - ./db_init:/app
     env_file: .env
     environment:
       - PYTHONUNBUFFERED=1

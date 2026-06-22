@@ -137,13 +137,15 @@ class Items(BaseModel):
 # Model of Order
 class Order(BaseModel):
     customer: Optional[str] = None
+    phone: Optional[str] = None
     address: Optional[str] = None
     type_of_delivery: str
-    is_preorder: bool
+    is_preorder: bool = False
     preorder_date: Optional[str] = None
     preorder_time: Optional[str] = None
     items: list[Items]
     total_price: float
+    save_customer: bool = False
     
 # Model of status
 class Status(BaseModel):
@@ -152,6 +154,12 @@ class Status(BaseModel):
 class StatusUpdate(BaseModel):
     order_id: int
     type_of_delivery: str
+    
+# Customers
+class CustomerCreate(BaseModel):
+    name: str
+    phone: Optional[str] = None
+    address: Optional[str] = None
 
 # Basic route to check if API and Socket are running
 @app.get("/")
@@ -275,6 +283,34 @@ async def load_catalog():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+@app.get("/load_modifiers")
+async def load_modifiers():
+    try:
+        conn = db_connect()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT code, name, category, price_modifier
+            FROM ingredients
+            WHERE active = TRUE AND is_modifier = TRUE
+            ORDER BY category, name;
+        """)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [
+            {
+                "code": r[0],
+                "name": r[1],
+                "category": r[2],
+                "price": float(r[3]),
+                "count": 0
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Adress autocomplete
 @app.get("/places/autocomplete")
 async def places_autocomplete(input: str, sessiontoken: str):
     url = "https://places.googleapis.com/v1/places:autocomplete"
@@ -286,8 +322,8 @@ async def places_autocomplete(input: str, sessiontoken: str):
         "includedRegionCodes": ["de"], 
         "locationRestriction": {
             "rectangle": {
-                "low": {"latitude": 52.95, "longitude": 8.55},
-                "high": {"latitude": 53.28, "longitude": 9.20}
+                "low": {"latitude": 53.40, "longitude": 8.45},
+                "high": {"latitude": 53.70, "longitude": 8.85}
             }
         }
     }
@@ -318,33 +354,6 @@ async def places_autocomplete(input: str, sessiontoken: str):
         })
         
     return {"predictions": predictions}
-    
-@app.get("/load_modifiers")
-async def load_modifiers():
-    try:
-        conn = db_connect()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT code, name, category, price_modifier
-            FROM ingredients
-            WHERE active = TRUE AND is_modifier = TRUE
-            ORDER BY category, name;
-        """)
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
-        return [
-            {
-                "code": r[0],
-                "name": r[1],
-                "category": r[2],
-                "price": float(r[3]),
-                "count": 0
-            }
-            for r in rows
-        ]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 # Orders sinchronization routes
 # Fetch all orders from database
@@ -424,6 +433,45 @@ async def get_orders_kitchen():
         print("No orders found in the database.")
         
     return orders
+
+# Customers
+@app.get("/customers/search")
+def search_customers(q: str):
+    if len(q.strip()) < 2:
+        return []
+
+    conn = db_connect()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, name, phone, address
+        FROM customers
+        WHERE name ILIKE %s OR phone ILIKE %s
+        ORDER BY updated_at DESC
+        LIMIT 20
+    """, (f"%{q}%", f"%{q}%"))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return [
+        {"id": str(r[0]), "name": r[1], "phone": r[2], "address": r[3]}
+        for r in rows
+    ]
+
+@app.post("/customers")
+def create_customer(data: CustomerCreate):
+    conn = db_connect()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO customers (name, phone, address)
+        VALUES (%s, %s, %s)
+        RETURNING id
+    """, (data.name, data.phone, data.address))
+    new_id = cur.fetchone()[0]
+    conn.commit()
+    cur.close()
+    conn.close()
+    return {"id": str(new_id), "name": data.name, "phone": data.phone, "address": data.address}
 
 # Analytics routes
 @app.get("/admin_dashboard/analytics")
@@ -636,7 +684,11 @@ def add_entry(data: TimetableEntry):
         VALUES (%s, %s, %s, %s, %s) RETURNING id
     """, (data.week_start, data.week_end, data.day, data.time_slot, data.staff_name))
     new_id = cur.fetchone()[0]
-    conn.commit(); cur.close(); conn.close()
+    
+    conn.commit() 
+    cur.close() 
+    conn.close()
+    
     return {"id": new_id, **data.dict()}
 
 # DELETE entry from timetable
@@ -685,7 +737,21 @@ async def checkout(data: Order):
     clean_data = jsonable_encoder(data) 
     is_preorder = clean_data.get("is_preorder", False)
     
-    print(clean_data, flush=True)
+    # Customer saving
+    is_save = clean_data.get("save_customer")
+    
+    # Customer Data
+    cus_name = clean_data.get("customer")
+    cus_phone = clean_data.get("phone")
+    cus_address = clean_data.get("address")
+    print(is_save, cus_name, cus_address, cus_phone, flush=True)
+    
+    if is_save and clean_data.get("type_of_delivery") == "Lieferservice" and cus_name:
+        cursor.execute("""
+            INSERT INTO customers (name, phone, address)
+            VALUES (%s, %s, %s)
+        """, (cus_name, cus_phone, cus_address))
+        conn.commit()
 
     if not is_preorder:
         if current_shift_id:

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
+
 import { CartItem, Modifier } from "./Beta_Catalog"; 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -13,9 +15,17 @@ import { cn } from "@/lib/utils"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
+// Address Autocomplete
 import { AddressAutocomplete } from "./AutocompleteComponent";
+
+// CustomerSearch
+import { CustomerSearch, Customer } from "./CustomerSearch";
+import { UserPlus, UserSearch } from "lucide-react";
+
+// Alerts
 import { AlertComponent } from "../BricksComponent/AlertComponents/AlertComponent";
 import { DectructiveAlertComponent } from "../BricksComponent/AlertComponents/DesctructiveAlertComponent";
+
 
 import { toast } from "sonner";
 
@@ -39,16 +49,26 @@ function padTwo(n: number): string {
 const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
 export default function PrimerCart({ items, onRemove, onClear, deliveryType, onOrderComplete }: Props) {
+  // Customer Data
   const [user_name, setUserName] = useState("");
   const [address, setAddress] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [saveCustomer, setSaveCustomer] = useState(true);
+  const [customerMode, setCustomerMode] = useState<"new" | "find" | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Preorder Data
   const [isPreorder, setIsPreorder] = useState(false)
   const [date, setDate] = useState("")
   const [time, setTiem] = useState("")
-
+  
+  // Helps for Preorders
   const now = new Date();
   const [hour, setHour] = useState<number>(now.getHours());
   const [minute, setMinute] = useState<number>(snapMinutes(now.getMinutes()));
+  
+  // Loading
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isPreorder) {
@@ -87,8 +107,8 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
   }, 0);
 
   const categoryPriority: Record<string, number> = { "extra": 1, "drink": 2, "dip": 3 };
-  const sortModifiers = (mods: Modifier[]) =>
-    [...mods].sort((a, b) => (categoryPriority[a.category] || 99) - (categoryPriority[b.category] || 99));
+
+  const sortModifiers = (mods: Modifier[]) => [...mods].sort((a, b) => (categoryPriority[a.category] || 99) - (categoryPriority[b.category] || 99));
 
   const handleCheckout = async () => {
     if (items.length === 0) return;
@@ -96,6 +116,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
 
     const orderData = {
       customer: user_name || " ",
+      phone: phone || " ",
       address: address || " ",
       type_of_delivery: deliveryType,
       is_preorder: isPreorder,
@@ -110,6 +131,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
         modifiers: item.modifiers || [],
       })),
       total_price: total,
+      save_customer: customerMode === "new" ? saveCustomer : false,
     };
 
     try {
@@ -122,16 +144,33 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
         toast.custom(() => <div className="w-full flex justify-center"><AlertComponent /></div>);
         setAddress("");
         setUserName("");
+        setPhone("");
+        setCustomerMode(null);
         setDate("");
         setHour(now.getHours());
         setMinute(snapMinutes(now.getMinutes()));
-        onOrderComplete();                  
+        onOrderComplete();
       }
     } catch (error) {
       toast.custom(() => <div className="w-full flex justify-center"><DectructiveAlertComponent /></div>);
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Customer saving buttons
+  const handleSelectCustomer = (c: Customer) => {
+    setUserName(c.name);
+    setPhone(c.phone ?? "");
+    setAddress(c.address ?? "");
+    setCustomerMode("find");
+  };
+
+  const handleNewCustomer = () => {
+    setUserName("");
+    setPhone("");
+    setAddress("");
+    setCustomerMode("new");
   };
 
   return (
@@ -300,17 +339,75 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
         <div className="space-y-2">
           {deliveryType === "Lieferservice" && (
             <div className="space-y-2">
-              <Input
-                placeholder="NAME, SURNAME"
-                value={user_name}
-                onChange={e => setUserName(e.target.value)}
-                className="rounded-none border-zinc-200 h-10 text-xs font-bold uppercase"
-              />
-              <AddressAutocomplete
-                value={address}
-                onChange={setAddress}
-                placeholder="ADDRESS"
-              />
+              {customerMode === null ? (
+                // ADD / FIND Customer
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={handleNewCustomer}
+                    className="flex items-center justify-center gap-2 border-2 border-zinc-200 rounded-xl py-3 text-xs font-black uppercase tracking-widest hover:border-black transition-colors"
+                  >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    New
+                  </button>
+                  <button
+                    onClick={() => setSearchOpen(true)}
+                    className="flex items-center justify-center gap-2 border-2 border-zinc-200 rounded-xl py-3 text-xs font-black uppercase tracking-widest hover:border-black transition-colors"
+                  >
+                    <UserSearch className="h-3.5 w-3.5" />
+                    Find
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Fallback */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                      {customerMode === "new" ? "New Customer" : "Existing Customer"}
+                    </span>
+                    <button
+                      onClick={() => setCustomerMode(null)}
+                      className="text-[10px] font-bold text-zinc-400 hover:text-black underline"
+                    >
+                      Change
+                    </button>
+                  </div>
+              
+                  <Input
+                    placeholder="NAME, SURNAME"
+                    value={user_name}
+                    onChange={e => setUserName(e.target.value)}
+                    disabled={customerMode === "find"}
+                    className="rounded-none border-zinc-200 h-10 text-xs font-bold uppercase disabled:opacity-60"
+                  />
+
+                  <Input
+                    placeholder="PHONE"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    disabled={customerMode === "find"}
+                    className="rounded-none border-zinc-200 h-10 text-xs font-bold disabled:opacity-60"
+                  />
+
+                  <AddressAutocomplete
+                    value={address}
+                    onChange={setAddress}
+                    placeholder="ADDRESS"
+                  />
+
+                  {customerMode === "new" && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <Switch
+                        id="save-customer"
+                        checked={saveCustomer}
+                        onCheckedChange={setSaveCustomer}
+                      />
+                      <Label htmlFor="save-customer" className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                        Save customer
+                      </Label>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
@@ -321,6 +418,13 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
           >
             {loading ? "..." : "Checkout →"}
           </Button>
+
+          <CustomerSearch
+            open={searchOpen}
+            onOpenChange={setSearchOpen}
+            onSelect={handleSelectCustomer}
+          />
+
         </div>
       </div>
     </div>

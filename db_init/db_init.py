@@ -48,6 +48,19 @@ CREATE TABLE IF NOT EXISTS catalog (
     sizes       JSONB            DEFAULT NULL
 );
 
+CREATE TABLE IF NOT EXISTS customers (
+    id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name        VARCHAR(255) NOT NULL,
+    phone       VARCHAR(50),
+    address     VARCHAR(255),
+    notes       TEXT,
+    created_at  TIMESTAMPTZ DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone);
+CREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name);
+
 CREATE TABLE IF NOT EXISTS shifts (
     id             SERIAL PRIMARY KEY,
     name           VARCHAR(100) NOT NULL,
