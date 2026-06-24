@@ -13,12 +13,13 @@ import { toast } from "sonner";
 interface Props {
     items: string[];
     isOpen: boolean;
-    onClose: () => void
+    onClose: () => void;
+    onSupplySuccess: (ingName: string, amount: string) => void;
 }
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
-export default function AddSupply({ items, isOpen, onClose } : Props) {
+export default function AddSupply({ items, isOpen, onClose, onSupplySuccess } : Props) {
     const [ingName, setIngName] = useState<string>("")
     const [supplier, setSupplier] = useState<string>("")
     const [amount, setAmount] = useState("")
@@ -44,13 +45,25 @@ export default function AddSupply({ items, isOpen, onClose } : Props) {
                 body: JSON.stringify(SupplyData),
             })
             if (res.ok) {
-                toast.custom(() => <div className="w-full flex justify-center"><AlertComponent /></div>);
+                toast.custom(() => 
+                    <div className="w-full flex justify-center">
+                        <AlertComponent />
+                    </div>
+                );
+
+                onSupplySuccess(ingName, amount)
+
                 setIngName("")
                 setSupplier("")
                 setAmount("")
+                onClose()
             }
         } catch (error){
-            toast.custom(() => <div className="w-full flex justify-center"><DectructiveAlertComponent /></div>);
+            toast.custom(() => 
+                <div className="w-full flex justify-center">
+                    <DectructiveAlertComponent />
+                </div>
+            );
         }
     }
     return (

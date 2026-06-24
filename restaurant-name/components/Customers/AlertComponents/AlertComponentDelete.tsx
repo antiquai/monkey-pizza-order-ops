@@ -5,7 +5,7 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 
-export const AlertComponent = () => {
+export const AlertComponentD = () => {
   return (
     <Alert className="max-w-md">
       <CheckCircle2Icon />

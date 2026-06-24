@@ -61,7 +61,7 @@ export default function OrderKeeper() {
                 body: JSON.stringify(sendData),
             })
             if (response.ok) {
-                toast.custom((t) => (
+                toast.custom(() => (
                     <div className="w-full flex justify-center">
                       <AlertComponent />
                     </div>
@@ -70,7 +70,7 @@ export default function OrderKeeper() {
         } catch (error) {
             console.error("Error sending order done:", error);
 
-            toast.custom((t) => (
+            toast.custom(() => (
                 <div className="w-full flex justify-center">
                   <DectructiveAlertComponent />
                 </div>

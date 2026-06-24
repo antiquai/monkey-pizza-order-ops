@@ -62,11 +62,19 @@ export default function OrderKeeper() {
             })
 
             if (response.ok) {
-                toast.custom(() => <AlertComponent />);
+                toast.custom(() => (
+                    <div className="w-full flex justify-center">
+                      <AlertComponent />
+                    </div>
+                ))
             }
         }
         catch (error) {
-            toast.custom(() => <DectructiveAlertComponent />);
+            toast.custom(() => (
+                <div className="w-full flex justify-center">
+                  <DectructiveAlertComponent />
+                </div>
+            ))
         }
 
     }

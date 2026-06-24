@@ -48,7 +48,7 @@ function padTwo(n: number): string {
 
 const GATEWAY_URL = process.env.NEXT_PUBLIC_SERVER_IP
 
-export default function PrimerCart({ items, onRemove, onClear, deliveryType, onOrderComplete }: Props) {
+export default function PrimerCart({ items, onRemove, deliveryType, onOrderComplete }: Props) {
   // Customer Data
   const [user_name, setUserName] = useState("");
   const [address, setAddress] = useState("");
@@ -141,7 +141,12 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
         body: JSON.stringify(orderData),
       });
       if (res.ok) {
-        toast.custom(() => <div className="w-full flex justify-center"><AlertComponent /></div>);
+        toast.custom(() => 
+          <div className="w-full flex justify-center">
+            <AlertComponent />
+          </div>
+        );
+
         setAddress("");
         setUserName("");
         setPhone("");
@@ -152,7 +157,11 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
         onOrderComplete();
       }
     } catch (error) {
-      toast.custom(() => <div className="w-full flex justify-center"><DectructiveAlertComponent /></div>);
+      toast.custom(() => 
+        <div className="w-full flex justify-center">
+          <DectructiveAlertComponent />
+        </div>
+      );
     } finally {
       setLoading(false);
     }
@@ -377,7 +386,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
                     value={user_name}
                     onChange={e => setUserName(e.target.value)}
                     disabled={customerMode === "find"}
-                    className="rounded-none border-zinc-200 h-10 text-xs font-bold uppercase disabled:opacity-60"
+                    className="rounded-xl border-zinc-200 h-10 text-xs font-bold uppercase disabled:opacity-60"
                   />
 
                   <Input
@@ -385,7 +394,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
                     disabled={customerMode === "find"}
-                    className="rounded-none border-zinc-200 h-10 text-xs font-bold disabled:opacity-60"
+                    className="rounded-xl border-zinc-200 h-10 text-xs font-bold disabled:opacity-60"
                   />
 
                   <AddressAutocomplete
@@ -414,7 +423,7 @@ export default function PrimerCart({ items, onRemove, onClear, deliveryType, onO
           <Button
             disabled={items.length === 0 || loading}
             onClick={handleCheckout}
-            className="w-full rounded-none h-14 bg-black text-white font-black uppercase tracking-widest text-sm hover:bg-zinc-800"
+            className="w-full rounded-md h-14 bg-black text-white font-black uppercase tracking-widest text-sm hover:bg-zinc-800"
           >
             {loading ? "..." : "Checkout →"}
           </Button>

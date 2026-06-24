@@ -5,13 +5,13 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 
-export const AlertComponent = () => {
+export const AlertComponentU = () => {
   return (
     <Alert className="max-w-md">
       <CheckCircle2Icon />
-      <AlertTitle>Supply was saved into storage</AlertTitle>
+      <AlertTitle>Customer data updated!</AlertTitle>
       <AlertDescription>
-        Supply detailes was successfully uploaded into database!
+        Customer data was updated in database
       </AlertDescription>
     </Alert>
   )

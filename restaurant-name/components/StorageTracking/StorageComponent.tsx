@@ -71,7 +71,7 @@ export default function Storage() {
                         </p>
                     </div>
 
-                    <div className="border-2 border-black px-5 py-3 rounded-2xl">
+                    <div className="border-2 border-black px-5 py-3 rounded-2xl flex space-x-3">
                         <p className="text-xs uppercase font-black tracking-widest">
                             {items.length} Items
                         </p>
@@ -137,7 +137,24 @@ export default function Storage() {
                 </div>
 
                 {addSupply && (
-                    <AddSupply items={items.map(item => item.name)} isOpen={addSupply.isOpen} onClose={() => setAddSupply({isOpen:false})} />
+                    <AddSupply 
+                        items={items.map(item => item.name)} 
+                        isOpen={addSupply.isOpen} 
+                        onClose={() => setAddSupply({isOpen:false})} 
+                        onSupplySuccess={(ingName, addedAmount) => {
+                            setItems(prevItems => 
+                                prevItems.map(item => {
+                                    if (item.name === ingName){
+                                        return {
+                                            ...item,
+                                            quantity: item.quantity + Number(addedAmount)
+                                        }
+                                    }
+                                    return item
+                                })
+                            )
+                        }}
+                    />
                 )}
             </div>
         </div>

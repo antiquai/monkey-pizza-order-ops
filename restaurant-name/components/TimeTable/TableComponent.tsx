@@ -83,7 +83,7 @@ export default function TableComponent({
                     onDrop={e => !readOnly && handleDrop(e, day, slot)}
                     className={`
                       px-1 py-1 align-top border-b border-zinc-50
-                      transition-colors duration-150 min-w-[90px]
+                      transition-colors duration-150 min-w-22.5
                       ${isHovered ? "bg-zinc-100 rounded-xl" : ""}
                     `}
                   >

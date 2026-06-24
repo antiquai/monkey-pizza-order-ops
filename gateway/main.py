@@ -161,9 +161,11 @@ class CustomerCreate(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     
-class CustomerID(BaseModel):
-    cus_id: str
-
+class CustomerUpdate(BaseModel):
+    category: str
+    info: str
+    
+    
 # Basic route to check if API and Socket are running
 @app.get("/")
 async def status():
@@ -476,7 +478,7 @@ def search_customers(q: str):
         for r in rows
     ]
     
-@app.get("/customers/load")
+@app.get("/customers")
 def load_customers():
     conn = db_connect()
     cur = conn.cursor()
@@ -501,10 +503,8 @@ def load_customers():
     
     return cus_data
 
-@app.post("/customers/delete")
-def delete_customer(data: CustomerID):
-    cus_id = data.cus_id
-    
+@app.delete("/customers/{cus_id}")
+def delete_customer(cus_id: str):   
     conn = db_connect()
     cur = conn.cursor()
     
@@ -514,8 +514,25 @@ def delete_customer(data: CustomerID):
     cur.close()
     conn.close()
     
-    
     return {"status": f"Customer was successfully deleted from database: {cus_id}"}
+
+@app.patch("/customers/{cus_id}")
+def update_customer(cus_id: str, data: CustomerUpdate):    
+    category = data.category.lower().strip()
+    info = data.info
+    
+    conn = db_connect()
+    cur = conn.cursor()
+    
+    querry = f"UPDATE customers SET {category} = %s WHERE id = %s"
+    
+    cur.execute(querry, (info, cus_id))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    
+    return {"status": f"Customer was successfully updated: {cus_id}"}
 
 # Analytics routes
 @app.get("/admin_dashboard/analytics")
@@ -659,7 +676,7 @@ def get_storage():
 @app.post("/supply")
 def supply(supply: Supply):
     
-    clean_data = jsonable_encoder(supply) 
+    clean_data = jsonable_encoder(supply)
     
     print(f'Supply: {clean_data}')
 

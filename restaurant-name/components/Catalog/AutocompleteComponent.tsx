@@ -111,7 +111,7 @@ export function AddressAutocomplete({ value, onChange, placeholder }: Props) {
         onKeyDown={handleKeyDown}
         onFocus={() => suggestions.length > 0 && setOpen(true)}
         placeholder={placeholder ?? "SHIPPING ADDRESS"}
-        className="w-full rounded-none border-zinc-200 h-10 text-xs font-bold uppercase"
+        className="w-full rounded-xl border-zinc-200 h-10 text-xs font-bold uppercase"
         autoComplete="off"
       />
       

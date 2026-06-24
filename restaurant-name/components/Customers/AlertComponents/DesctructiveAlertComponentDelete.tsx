@@ -5,13 +5,13 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 
-export const DectructiveAlertComponent = () => {
+export const DectructiveAlertComponentD = () => {
   return (
     <Alert variant="destructive" className="max-w-md">
       <AlertCircleIcon />
-      <AlertTitle>Proccess Error</AlertTitle>
+      <AlertTitle>API Error</AlertTitle>
       <AlertDescription>
-        Ooops! Something went wrong, please conntact Hotline!
+        Something gone wrong while deleting customer
       </AlertDescription>
     </Alert>
   )

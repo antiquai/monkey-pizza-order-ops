@@ -114,7 +114,11 @@ export default function TimeTableComponent() {
     // Check if this week already exists
     const exists = weeks.find(w => w.week_start === weekStart)
     if (exists) {
-      toast.custom(() => <div className="w-full flex justify-center"><DectructiveAlertComponent /></div>);
+      toast.custom(() => 
+        <div className="w-full flex justify-center">
+          <DectructiveAlertComponent />
+        </div>
+      );
       return
     }
 
@@ -180,7 +184,11 @@ export default function TimeTableComponent() {
       })
 
       if (res.ok) {
-        toast.custom(() => <div className="w-full flex justify-center"><AlertComponent /></div>);
+        toast.custom(() => 
+          <div className="w-full flex justify-center">
+            <AlertComponent />
+          </div>
+        );
       }
     }catch (e) {
       console.error(e)
