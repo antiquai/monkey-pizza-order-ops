@@ -38,28 +38,6 @@ The system consists of three interconnected components:
 
 **Kitchen & Packstation**: Interfaces designed to be displayed on monitors at the chef's and packer's workstations.
 
-## Roadmap (COMING SOON)
-
-### 🔄 Improvements & Refactoring
-
-- Advanced inventory and semi-finished goods tracking.
-- Digital receipt storage system overhaul.
-- UI/UX redesign for Kitchen, Packstation, and Menu displays.
-- Address autocomplete integration.
-- Pizza nach Wunsch (Custom Pizza builder).
-- Cross-screen order cancellation.
-- Fiscalization & payment processing (Terminal & Card support).
-- *README*.md
-  
-### 🚀 New Features
-- Customer profiles (saving data for faster checkout).
-- Delivery driver monitor.
-- Accounting & Supply chain/delivery tracking.
-- Manager dashboard (add/remove menu items).
-- HR component (shift tracking & documentation).
-- Web client for staff (schedules & personal stats).
-- Thermal printer support for order receipts.
-
 ## ⚠️ Disclaimer
 **The demo video is a mockup; all data, names, and positions are fictional. Any coincidences are purely coincidental.**
 
