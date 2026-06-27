@@ -67,7 +67,7 @@ export default function TimeTableComponent() {
 
   // Fetch staff + all weeks on mount
   useEffect(() => {
-    fetch(`${GATEWAY_URL}/personal`)
+    fetch(`${GATEWAY_URL}/staff`)
       .then(r => r.json())
       .then(setStaff)
       .catch(console.error)

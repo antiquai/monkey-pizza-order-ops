@@ -44,18 +44,9 @@ export default function WaiterDashboard() {
   const [loading, setLoading] = useState(true);
 
   const handleCancel = async (orderId: number) => {
-    const sendData = { 
-        order_id: orderId,
-        statusbar: "cancelled"
-    }
-
     try {
-      const response = await fetch(`${GATEWAY_URL}/cancel_order`, {
+      const response = await fetch(`${GATEWAY_URL}/cancel_order/${orderId}`, {
           method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify(sendData)
       });
 
       if (response.ok) {

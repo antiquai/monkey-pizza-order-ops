@@ -69,13 +69,38 @@ CREATE TABLE IF NOT EXISTS shifts (
     total_duration INTERVAL     GENERATED ALWAYS AS (closed_at - opened_at) STORED
 );
 
-CREATE TABLE IF NOT EXISTS personal (
-    id    SERIAL PRIMARY KEY,
-    name  VARCHAR(100) NOT NULL,
-    color VARCHAR(20)  DEFAULT '#22c55e',
-    role  VARCHAR(50)  NOT NULL DEFAULT 'delivery_staff',
-    code  VARCHAR(50)  UNIQUE
+CREATE TABLE IF NOT EXISTS staff (
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(100) NOT NULL,
+    color       VARCHAR(20)  DEFAULT '#22c55e',
+    role        VARCHAR(50)  NOT NULL DEFAULT 'delivery_staff',
+    code        VARCHAR(50)  UNIQUE,
+    pay_type    VARCHAR(20) NOT NULL DEFAULT 'hourly'
+        CHECK (pay_type IN ('hourly', 'fixed', 'per_delivery')),
+    hourly_rate NUMERIC(6,2) DEFAULT NULL,
+    fixed_rate  NUMERIC(6,2) DEFAULT NULL,
+    active      BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS staff_shifts (
+    id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    staff_id        INT NOT NULL REFERENCE staff(id),
+    shift_id        INT REFERENCE shifts(id),
+    shift_name        INT REFERENCE shifts(name),
+    clocked_in      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    clocked_out     TIMESTAMPTZ DEFAULT NULL,
+    worked_duration INTERVAL GENERATED ALWAYS AS (clocked_out - clocked_in) STORED,
+    role_worked     VARCHAR(50),
+    calculated_pay  NUMERIC(8,2) DEFAULT NULL,
+    cash_collected  NUMERIC(8,2) DEFAULT NULL,
+    cash_owed       NUMERIC(8,2) DEFAULT NULL,
+    note            TEXT,
+    created_at      TIMESTAMPTZ DEFAULT NOW() 
+)
+
+CREATE INDEX IF NOT EXISTS idx_staff_shifts_staff ON staff_shifts(staff_id);
+CREATE INDEX IF NOT EXISTS idx_staff_shifts_open ON staff_shifts(staff_id) WHERE clocked_out IS NULL;
 
 CREATE TABLE IF NOT EXISTS timetable (
     id         SERIAL PRIMARY KEY,
@@ -95,24 +120,29 @@ CREATE TABLE IF NOT EXISTS timetable_weeks (
 );
 
 CREATE TABLE IF NOT EXISTS pizza_orders (
-    id               UUID         DEFAULT gen_random_uuid() PRIMARY KEY,
-    kitchen_id       VARCHAR(50),
-    customer         VARCHAR(255),
-    address          VARCHAR(255),
-    type_of_delivery VARCHAR(50),
-    items            JSONB,
-    total_price      NUMERIC(10, 2),
-    shift_name       VARCHAR(100) DEFAULT NULL,
-    shift_id         INT REFERENCES shifts(id) DEFAULT NULL,
-    is_preorder      BOOLEAN NOT NULL DEFAULT FALSE,
-    preorder_date    VARCHAR(20),
-    preorder_time    VARCHAR(20),
-    status           VARCHAR(50)  NOT NULL DEFAULT 'pending' 
+    id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    kitchen_id          VARCHAR(50),
+    customer            VARCHAR(255),
+    address             VARCHAR(255),
+    type_of_delivery    VARCHAR(50),
+    items               JSONB,
+    total_price         NUMERIC(10, 2),
+    shift_name          VARCHAR(100) DEFAULT NULL,
+    shift_id            INT REFERENCES shifts(id) DEFAULT NULL,
+    assigned_staff_idc  INT REFERENCES staff(id) DEFAULT NULL;
+    payment_method VARCHAR(20) DEFAULT 'cash'
+        CHECK (payment_method IN ('cash', 'card', 'online', 'pay_later'));
+    payment_status VARCHAR(20) DEFAULT 'open'
+        CHECK (payment_status IN ('open', 'processing', 'paid', 'failed'));
+    is_preorder         BOOLEAN NOT NULL DEFAULT FALSE,
+    preorder_date       VARCHAR(20),
+    preorder_time       VARCHAR(20),
+    status              VARCHAR(50)  NOT NULL DEFAULT 'pending' 
         CHECK (status IN ('pending', 'in_oven', 'awaiting_for_delivery', 'in_delivery', 'done', 'cancelled')),
-    inventory_status VARCHAR(50)  NOT NULL DEFAULT 'pending'
+    inventory_status    VARCHAR(50)  NOT NULL DEFAULT 'pending'
         CHECK (inventory_status IN ('pending', 'deducted', 'blocked', 'error')),
-    inventory_note   TEXT,
-    created_at       TIMESTAMPTZ    DEFAULT NOW()
+    inventory_note      TEXT,
+    created_at          TIMESTAMPTZ    DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS ingredients (
@@ -327,18 +357,18 @@ def _seed_catalog(cur: Cursor, items: list[dict]) -> None:
     print(f"catalog: {len(items)} items inserted.", flush=True)
 
 
-def _seed_personal(cur: Cursor, staff: list[dict]) -> None:
-    cur.execute("SELECT COUNT(*) FROM personal;")
+def _seed_staff(cur: Cursor, staff: list[dict]) -> None:
+    cur.execute("SELECT COUNT(*) FROM staff;")
     if cur.fetchone()[0] > 0:
-        print("personal: already populated, skipping.", flush=True)
+        print("staff: already populated, skipping.", flush=True)
         return
 
     for person in staff:
         cur.execute(
-            "INSERT INTO personal (name, color, role, code) VALUES (%s, %s, %s, %s)",
+            "INSERT INTO staff (name, color, role, code) VALUES (%s, %s, %s, %s)",
             (person["name"], person["color"], person["role"], person["code"]),
         )
-    print(f"personal: {len(staff)} staff members inserted.", flush=True)
+    print(f"staff: {len(staff)} staff members inserted.", flush=True)
 
 
 def _seed_ingredients(cur: Cursor, ingredients: list[dict]) -> None:
@@ -450,7 +480,7 @@ def init() -> None:
     with open("menu.json", encoding="utf-8") as f:
         menu: dict = json.load(f)
 
-    with open("personal.json", encoding="utf-8") as f:
+    with open("staff.json", encoding="utf-8") as f:
         staff: list[dict] = json.load(f)
 
     conn = _db_connect()
@@ -460,7 +490,7 @@ def init() -> None:
         _apply_ddl(cur)
         
         _seed_catalog(cur, menu["items"])
-        _seed_personal(cur, staff)
+        _seed_staff(cur, staff)
 
         _seed_ingredients(cur, menu["ingredients"])
 

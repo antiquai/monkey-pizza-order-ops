@@ -47,18 +47,10 @@ export default function OrderKeeper() {
 
     // AFTER CLICKING DONE, SEND API REQUEST TO BACKEND TO MARK ORDER AS DONE, THEN REMOVE FROM LIST 
     const handleDone = async (orderId: number) => {
-        const sendData = {
-            order_id: orderId,
-        }
-
         try {
             // Send API response and json of order_id number
-            const response = await fetch(`${GATEWAY_URL}/order_in_oven`, {
+            const response = await fetch(`${GATEWAY_URL}/order_in_oven/${orderId}`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(sendData),
             })
             if (response.ok) {
                 toast.custom(() => (

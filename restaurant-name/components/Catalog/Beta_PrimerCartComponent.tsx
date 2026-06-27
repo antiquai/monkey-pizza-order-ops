@@ -4,19 +4,24 @@ import { useState, useEffect } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
 
+import { Calendar as CalendarIcon, Clock, ChevronUp, ChevronDown } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CartItem, Modifier } from "./Beta_Catalog"; 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { format, parseISO } from "date-fns"
-import { Calendar as CalendarIcon, Clock, ChevronUp, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Loader2 } from "lucide-react";
 
 // Address Autocomplete
 import { AddressAutocomplete } from "./AutocompleteComponent";
+
+// PaymentInput
+import { PaymentInput, PaymentMethod } from "./PaymentInput";
 
 // CustomerSearch
 import { CustomerSearch, Customer } from "./CustomerSearch";
@@ -66,6 +71,12 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
   const now = new Date();
   const [hour, setHour] = useState<number>(now.getHours());
   const [minute, setMinute] = useState<number>(snapMinutes(now.getMinutes()));
+
+  // Payments
+  const [isConmfirmationDialogOpened, setIsConmfirmationDialogOpened] = useState(false)
+  const [isProccessing, setIsProccessign] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [isConfirmed, setIsConfirmed] = useState(false)
   
   // Loading
   const [loading, setLoading] = useState(false);
@@ -110,15 +121,24 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
 
   const sortModifiers = (mods: Modifier[]) => [...mods].sort((a, b) => (categoryPriority[a.category] || 99) - (categoryPriority[b.category] || 99));
 
-  const handleCheckout = async () => {
+  const handlePaymentConfirmation = () => {
+    setIsConmfirmationDialogOpened(true)
+  }
+
+  const handleCheckout = async (isConfirmedParam = false) => {
     if (items.length === 0) return;
     setLoading(true);
+    setIsProccessign(true)
+
+    setIsConfirmed(isConfirmedParam);
 
     const orderData = {
       customer: user_name || " ",
       phone: phone || " ",
       address: address || " ",
       type_of_delivery: deliveryType,
+      payment_method: paymentMethod,
+      is_payment_confirmed: isConfirmed,
       is_preorder: isPreorder,
       preorder_date: date || " ",
       preorder_time: time || " ",        
@@ -147,6 +167,7 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
           </div>
         );
 
+        setIsConmfirmationDialogOpened(false);
         setAddress("");
         setUserName("");
         setPhone("");
@@ -154,6 +175,7 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
         setDate("");
         setHour(now.getHours());
         setMinute(snapMinutes(now.getMinutes()));
+        setPaymentMethod("cash");
         onOrderComplete();
       }
     } catch (error) {
@@ -164,6 +186,7 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
       );
     } finally {
       setLoading(false);
+      setIsProccessign(false)
     }
   };
   
@@ -397,6 +420,11 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
                     className="rounded-xl border-zinc-200 h-10 text-xs font-bold disabled:opacity-60"
                   />
 
+                  <PaymentInput 
+                    value={paymentMethod} 
+                    onChange={setPaymentMethod} 
+                  />
+
                   <AddressAutocomplete
                     value={address}
                     onChange={setAddress}
@@ -422,7 +450,7 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
 
           <Button
             disabled={items.length === 0 || loading}
-            onClick={handleCheckout}
+            onClick={handlePaymentConfirmation}
             className="w-full rounded-md h-14 bg-black text-white font-black uppercase tracking-widest text-sm hover:bg-zinc-800"
           >
             {loading ? "..." : "Checkout →"}
@@ -436,6 +464,23 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
 
         </div>
       </div>
+      <Dialog open={isConmfirmationDialogOpened && paymentMethod !== "pay_later"} onOpenChange={setIsConmfirmationDialogOpened}>
+          <DialogContent>
+              <DialogHeader>
+                  <DialogTitle className="font-black uppercase tracking-tight text-xl">Confirm Deletion</DialogTitle>
+                  <DialogDescription className="text-zinc-500 text-sm">
+                      Waiting for Payment Confirmation
+                  </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="mt-6 flex gap-2">
+                  <Button variant="outline" onClick={() => setIsConmfirmationDialogOpened(false)} disabled={isProccessing} className="font-bold uppercase text-xs tracking-wider">Cancel</Button>
+                  <Button variant="destructive" onClick={() => {handleCheckout(true)}} disabled={isProccessing} className="font-bold uppercase text-xs tracking-wider flex items-center gap-2">
+                      {isProccessing && <Loader2 className="w-3 h-3 animate-spin" />}
+                      Confirm
+                  </Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
     </div>
   );
 }

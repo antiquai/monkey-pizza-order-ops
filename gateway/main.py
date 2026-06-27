@@ -140,6 +140,8 @@ class Order(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     type_of_delivery: str
+    payment_method: str
+    is_payment_confirmed: bool = False,
     is_preorder: bool = False
     preorder_date: Optional[str] = None
     preorder_time: Optional[str] = None
@@ -147,10 +149,7 @@ class Order(BaseModel):
     total_price: float
     save_customer: bool = False
     
-# Model of status
-class Status(BaseModel):
-    order_id: int
-
+# Update helper
 class StatusUpdate(BaseModel):
     order_id: int
     type_of_delivery: str
@@ -681,22 +680,21 @@ def supply(supply: Supply):
     print(f'Supply: {clean_data}')
 
 # Staff routes
-@app.get("/personal")
+@app.get("/staff")
 def get_personal():
     conn = db_connect()
     cur = conn.cursor()
-    cur.execute("SELECT id, name, color FROM personal ORDER BY name")
+    cur.execute("SELECT id, name, color FROM staff ORDER BY name")
     rows = cur.fetchall()
     cur.close(); conn.close()
     return [{"id": r[0], "name": r[1], "color": r[2]} for r in rows]
 
-# Staff routes
-@app.post("/personal")
+@app.post("/staff")
 def add_personal(data: StaffMember):
     conn = db_connect()
     cur = conn.cursor()
     cur.execute(
-        "INSERT INTO personal (name, color) VALUES (%s, %s) RETURNING id",
+        "INSERT INTO staff (name, color) VALUES (%s, %s) RETURNING id",
         (data.name, data.color)
     )
     new_id = cur.fetchone()[0]
@@ -877,15 +875,13 @@ async def checkout(data: Order):
             return {"status": f"Preorder logged safely for future shift: {target_shift_name}"}
 
 # Changing status of order and sending to the packstation for next step (oven, packing, delivery etc.)
-@app.post("/order_in_oven")
-async def order_in_oven(data: Status):
-    order_id = data.order_id
-    
-    print(f'Order {order_id} sent to the oven !', flush=True)
+@app.post("/order_in_oven/{orderId}")
+async def order_in_oven(orderId: int):
+    print(f'Order {orderId} sent to the oven !', flush=True)
     try:
         conn = db_connect()
         cursor = conn.cursor()
-        cursor.execute("""UPDATE pizza_orders SET status = 'in_oven' WHERE kitchen_id = %s""", (f"order_{order_id}",))
+        cursor.execute("""UPDATE pizza_orders SET status = 'in_oven' WHERE kitchen_id = %s""", orderId,)
         conn.commit()
     except Exception as e:
         print(f"Error occurred while updating order status: {e}", flush=True)
@@ -893,9 +889,9 @@ async def order_in_oven(data: Status):
         cursor.close()
         conn.close()
         
-    await sio.emit("order_sent_to_oven", {"order_id": order_id}, room='kitchen')
+    await sio.emit("order_sent_to_oven", {"order_id": orderId}, room='kitchen')
         
-    return {"status": f"Order {order_id} marked as sent to the oven !"}
+    return {"status": f"Order {orderId} marked as sent to the oven !"}
 
 # When order is packed, send to delivery and update status in database
 @app.post("/order_packed")
@@ -908,18 +904,17 @@ async def order_packed(data: StatusUpdate):
 
     r.lpush("update_status", json.dumps({"order_id": order_id, "type_of_delivery": type_of_delivery, "shift_name": shift_name}))
 
-# Cancel order in emergency case 
-@app.post("/cancel_order")
-async def cancel_order(data: Status):
+# Cancel order in case of emergency  
+@app.post("/cancel_order/{orderId}")
+async def cancel_order(orderId: int):
     shift_name = get_shift_from_db()
-    order_id = data.order_id
     
-    print(f'Order {order_id} cancelled !', flush=True)
+    print(f'Order {orderId} cancelled !', flush=True)
     
-    await sio.emit("order_cancelled", {"order_id": order_id}, room='kitchen')
+    await sio.emit("order_cancelled", {"order_id": orderId}, room='kitchen')
     
-    r.lpush("update_status", json.dumps({"order_id": order_id, "status": "cancelled", "shift_name": shift_name}))
-    return {"status": f"Order {order_id} marked as cancelled !"}
+    r.lpush("update_status", json.dumps({"order_id": orderId, "status": "cancelled", "shift_name": shift_name}))
+    return {"status": f"Order {orderId} marked as cancelled !"}
 
 
 app.mount("/socket.io", sio_app)
