@@ -76,7 +76,6 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
   const [isConmfirmationDialogOpened, setIsConmfirmationDialogOpened] = useState(false)
   const [isProccessing, setIsProccessign] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
-  const [isConfirmed, setIsConfirmed] = useState(false)
   
   // Loading
   const [loading, setLoading] = useState(false);
@@ -122,15 +121,18 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
   const sortModifiers = (mods: Modifier[]) => [...mods].sort((a, b) => (categoryPriority[a.category] || 99) - (categoryPriority[b.category] || 99));
 
   const handlePaymentConfirmation = () => {
-    setIsConmfirmationDialogOpened(true)
+    if (paymentMethod === 'pay_later') {
+      handleCheckout(false)
+    } else {
+      setIsConmfirmationDialogOpened(true)
+    }
+
   }
 
-  const handleCheckout = async (isConfirmedParam = false) => {
+  const handleCheckout = async (isConfirmedParam: boolean) => {
     if (items.length === 0) return;
     setLoading(true);
     setIsProccessign(true)
-
-    setIsConfirmed(isConfirmedParam);
 
     const orderData = {
       customer: user_name || " ",
@@ -138,7 +140,7 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
       address: address || " ",
       type_of_delivery: deliveryType,
       payment_method: paymentMethod,
-      is_payment_confirmed: isConfirmed,
+      is_payment_confirmed: isConfirmedParam,
       is_preorder: isPreorder,
       preorder_date: date || " ",
       preorder_time: time || " ",        
@@ -420,11 +422,6 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
                     className="rounded-xl border-zinc-200 h-10 text-xs font-bold disabled:opacity-60"
                   />
 
-                  <PaymentInput 
-                    value={paymentMethod} 
-                    onChange={setPaymentMethod} 
-                  />
-
                   <AddressAutocomplete
                     value={address}
                     onChange={setAddress}
@@ -448,6 +445,11 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
             </div>
           )}
 
+          <PaymentInput 
+            value={paymentMethod} 
+            onChange={setPaymentMethod} 
+          />
+
           <Button
             disabled={items.length === 0 || loading}
             onClick={handlePaymentConfirmation}
@@ -464,7 +466,7 @@ export default function PrimerCart({ items, onRemove, deliveryType, onOrderCompl
 
         </div>
       </div>
-      <Dialog open={isConmfirmationDialogOpened && paymentMethod !== "pay_later"} onOpenChange={setIsConmfirmationDialogOpened}>
+      <Dialog open={isConmfirmationDialogOpened} onOpenChange={setIsConmfirmationDialogOpened}>
           <DialogContent>
               <DialogHeader>
                   <DialogTitle className="font-black uppercase tracking-tight text-xl">Confirm Deletion</DialogTitle>
